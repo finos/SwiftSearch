@@ -3,5 +3,5 @@ const SwiftSearch = remote.require('../lib/index');
 
 window['ssf'] = {
     Search: SwiftSearch.Search,
-    SearchUtils: SwiftSearch.SearchUtils
+    SearchUtils: SwiftSearch.SearchUtils,
 };

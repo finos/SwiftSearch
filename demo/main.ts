@@ -8,8 +8,8 @@ app.on('ready', () => {
         width: 800,
         webPreferences: {
             nodeIntegration: false,
-            preload: __dirname + '/preload.js'
-        }
+            preload: __dirname + '/preload.js',
+        },
     });
 
     mainWindow.loadURL('file://' + __dirname + '/search.html');
