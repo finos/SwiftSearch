@@ -8,7 +8,7 @@
     "postinstall": "npm run build",
     "rebuild": "electron-rebuild -f",
     "demo": "tsc ./demo/*.ts && cross-env ELECTRON_DEV=true electron ./demo/main.js",
-    "build": "git clean -xdf ./lib && npm run lint && npm run rebuild && tsc",
+    "build": "git clean -xdf ./lib && npm run rebuild && tsc",
     "lint": "tslint --project tsconfig.json",
     "test": "cross-env ELECTRON_DEV=true jest"
   },
