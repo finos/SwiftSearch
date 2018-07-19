@@ -3,3 +3,4 @@ library
 .idea
 .github
 app.log
+lib/demo
