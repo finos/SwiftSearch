@@ -11,7 +11,7 @@ import { logLevels } from '../log/logLevels';
  * try finding arg that starts with argName.
  * @return {String}           If found, returns the arg, otherwise null.
  */
-function getCmdLineArg(argv, argName, exactMatch) {
+function getCmdLineArg(argv: string[], argName: string, exactMatch: boolean) {
     if (!Array.isArray(argv)) {
         log.send(logLevels.WARN, 'getCmdLineArg: TypeError invalid func arg, must be an array: ' + argv);
         return null;

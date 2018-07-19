@@ -32,7 +32,7 @@ const makeBoundTimedCollector = (isIndexing: any, timeout: any, callback: any) =
 
     }
 
-    function flush(queue: any) {
+    function flush(this: any, queue: any) {
         clearTimeout(timer);
         timer = null;
         resetQueue();

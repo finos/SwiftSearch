@@ -9,7 +9,7 @@ import { UserConfig } from '../interface/interface';
  */
 /*eslint class-methods-use-this: ["error", { "exceptMethods": ["checkFreeSpace"] }] */
 export default class SearchUtils {
-    private indexVersion: string;
+    public readonly indexVersion: string;
 
     constructor() {
         this.indexVersion = searchConfig.INDEX_VERSION;
@@ -29,7 +29,7 @@ export default class SearchUtils {
      * @param userId
      * @returns {Promise<object>}
      */
-    public getSearchUserConfig(userId): Promise<UserConfig> {
+    public getSearchUserConfig(userId: string): Promise<UserConfig> {
         return new Promise((resolve, reject) => {
             readFile.call(this, userId, resolve, reject);
         });
@@ -42,7 +42,7 @@ export default class SearchUtils {
      * @param data
      * @returns {Promise<object>}
      */
-    public updateUserConfig(userId, data): Promise<UserConfig> {
+    public updateUserConfig(userId: string, data: UserConfig): Promise<UserConfig> {
         return new Promise((resolve, reject) => {
             updateConfig.call(this, userId, data, resolve, reject);
         });
@@ -56,17 +56,17 @@ export default class SearchUtils {
  * @param resolve
  * @param reject
  */
-function readFile(userId, resolve, reject) {
+function readFile(this: SearchUtils, userId: string, resolve: any, reject: any) {
     if (fs.existsSync(`${searchConfig.FOLDERS_CONSTANTS.USER_CONFIG_FILE}`)) {
         fs.readFile(`${searchConfig.FOLDERS_CONSTANTS.USER_CONFIG_FILE}`, 'utf8', (err, data) => {
             if (err) {
-                return reject(new Error('Error reading the '));
+                return reject('Error reading the UserConfig');
             }
             let usersConfig: UserConfig;
             try {
                 usersConfig = JSON.parse(data);
             } catch (e) {
-                createUserConfigFile(userId, undefined);
+                createUserConfigFile.call(this, userId, undefined);
                 return reject('can not parse user config file data: ' + data + ', error: ' + e);
             }
             if (!usersConfig[userId]) {
@@ -76,7 +76,7 @@ function readFile(userId, resolve, reject) {
             return resolve(usersConfig[userId]);
         });
     } else {
-        createUserConfigFile(userId, undefined);
+        createUserConfigFile.call(this, userId, undefined);
         resolve(null);
     }
 }
@@ -107,8 +107,8 @@ function createUser(userId: string, oldConfig: UserConfig): void {
  * @param userId
  * @param data
  */
-function createUserConfigFile(userId, data): void {
-    let userData = data;
+function createUserConfigFile(this: SearchUtils, userId: string, data: UserConfig): void {
+    let userData: any = data;
 
     const createStream = fs.createWriteStream(searchConfig.FOLDERS_CONSTANTS.USER_CONFIG_FILE);
     if (userData) {
@@ -135,7 +135,7 @@ function createUserConfigFile(userId, data): void {
  * @param reject
  * @returns {*}
  */
-function updateConfig(userId, data, resolve, reject) {
+function updateConfig(this: SearchUtils, userId: string, data: UserConfig, resolve: any, reject: any) {
     const userData: UserConfig = data;
 
     if (userData && !userData.indexVersion) {
@@ -144,7 +144,7 @@ function updateConfig(userId, data, resolve, reject) {
 
     const configPath = searchConfig.FOLDERS_CONSTANTS.USER_CONFIG_FILE;
     if (!fs.existsSync(configPath)) {
-        createUserConfigFile(userId, userData);
+        createUserConfigFile.call(this, userId, userData);
         return reject(null);
     }
 
@@ -154,7 +154,7 @@ function updateConfig(userId, data, resolve, reject) {
     try {
         oldConfig = JSON.parse(oldData);
     } catch (e) {
-        createUserConfigFile(userId, data);
+        createUserConfigFile.call(this, userId, data);
         return reject(new Error('can not parse user config file data: ' + e));
     }
 

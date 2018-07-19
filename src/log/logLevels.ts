@@ -1,6 +1,6 @@
 'use strict';
 
-import * as keyMirror from 'keymirror';
+import keyMirror = require('keymirror');
 
 /**
  * The different log levels

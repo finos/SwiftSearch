@@ -18,9 +18,8 @@ import { UserConfig, Std } from './interface/interface';
  */
 
 export default class Search extends SearchUtils {
-    private readonly userId: string;
+    public readonly userId: string;
     private isInitialized: boolean;
-    private messageData: any[];
     private isRealTimeIndexing: boolean;
     private readonly collector: any;
 
@@ -32,7 +31,6 @@ export default class Search extends SearchUtils {
     constructor(userId: string, key: string) {
         super();
         this.isInitialized = false;
-        this.messageData = [];
         this.userId = userId;
         this.isRealTimeIndexing = false;
         this.getUserConfig(key);
@@ -109,7 +107,7 @@ export default class Search extends SearchUtils {
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
         if (isFileExist.call(this, 'USER_INDEX_PATH')) {
             const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
-            libSymphonySearch.symSEDeserializeMainIndexToEncryptedFoldersAsync(mainIndexFolder, key, (error, res) => {
+            libSymphonySearch.symSEDeserializeMainIndexToEncryptedFoldersAsync(mainIndexFolder, key, (error: never, res: number) => {
 
                 clearSearchData.call(this);
                 if (res === undefined || res === null || res < 0) {
@@ -431,7 +429,7 @@ export default class Search extends SearchUtils {
 
         if (hashTags.length > 0) {
             hashCashTagQuery = ' OR tags:(';
-            hashTags.forEach((item) => {
+            hashTags.forEach((item: string) => {
                 hashCashTagQuery = hashCashTagQuery + '"' + item + '" ';
             });
             hashCashTagQuery += ')';
@@ -577,7 +575,7 @@ export default class Search extends SearchUtils {
 
 }
 
-function clearSearchData(): void {
+function clearSearchData(this: Search): void {
     function removeFiles(filePath: string) {
         if (fs.existsSync(filePath)) {
             fs.readdirSync(filePath).forEach((file) => {
@@ -603,7 +601,7 @@ function clearSearchData(): void {
  * @param type
  * @returns {boolean}
  */
-function isFileExist(type: string): boolean {
+function isFileExist(this: Search, type: string): boolean {
     let searchPath;
 
     if (!this.userId) {

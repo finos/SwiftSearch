@@ -1,21 +1,33 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es5",
-    "lib": ["es2016", "dom"],
-    "declaration": true,
-    "outDir": "./lib",
-    "sourceMap": true,
-    "noImplicitThis": false,
-    "noImplicitAny": false,
+    "pretty": true,
+    "target": "ES2016",
+    "outDir": "lib",
+    "lib": [
+      "es2016",
+      "dom"
+    ],
+    "moduleResolution": "node",
     "strict": true,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "declaration": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noImplicitThis": true,
+    "noUnusedParameters": true,
     "typeRoots": [
       "node_modules/@types"
     ]
   },
   "exclude": [
     "node_modules",
-    "./lib",
-    "./tests"
+    "lib",
+    "tests"
   ]
 }

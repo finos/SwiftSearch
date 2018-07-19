@@ -1,13 +1,14 @@
 'use strict';
 
-import {app} from 'electron';
+import { app } from 'electron';
 import * as path from 'path';
 import { getCmdLineArg } from '../utils/getCmdLineArg';
 import { logLevels } from './logLevels';
+import { ElectronLogInterface, LogWindow } from '../interface/interface';
 
 const MAX_LOG_QUEUE_LENGTH = 100;
 
-let electronLog;
+let electronLog: ElectronLogInterface;
 
 export class Logger {
     private logQueue: any[];
@@ -66,7 +67,7 @@ export class Logger {
      * Sets a window instance for the remote object
      * @param win
      */
-    public setLogWindow(win): void {
+    public setLogWindow(win: LogWindow): void {
         this.logWindow = win;
 
         if (this.logWindow) {
