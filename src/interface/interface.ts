@@ -52,3 +52,43 @@ export interface ElectronLogInterface {
 export interface LogWindow {
     send(id: string, message: object): void;
 }
+
+/**
+ * Entities
+ */
+interface Entities {
+    hashtags: any[];
+    cashtags: any[];
+    userMentions: any[]
+}
+
+/**
+ * Messages
+ */
+export interface Message {
+    messageId: string;
+    text: string;
+    senderId: string;
+    threadId: string;
+    ingestionDate: string;
+    chatType: string;
+    isPublic: string;
+    sendingApp: string;
+    senderAvatar: string;
+    senderName: string;
+    senderType: string;
+    entities: Entities;
+    tags: string;
+    attachments: any[];
+    attachmentNames: string;
+}
+
+/**
+ * SearchResponse
+ */
+export interface SearchResponse {
+    messages: Message[];
+    more: number;
+    returned: number;
+    total: number;
+}

@@ -1,14 +1,15 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import {isMac, isWindowsOS} from '../src/utils/misc';
+import { UserConfig, SearchResponse } from "../src/interface/interface";
 
 let executionPath: string = '';
 let userConfigDir: string = '';
 
-let searchConfig;
-let SearchApi;
-let SearchUtilsAPI;
-let libSymphonySearch;
+let searchConfig: any;
+let SearchApi: any;
+let SearchUtilsAPI: any;
+let libSymphonySearch: any;
 
 jest.mock('electron', (): object => {
     return {
@@ -23,7 +24,7 @@ function mockedGetName(): string {
     return 'Symphony';
 }
 
-function mockedGetPath(type): string {
+function mockedGetPath(type: string): string {
     if (type === 'exe') {
         return executionPath;
     }
@@ -36,9 +37,9 @@ function mockedGetPath(type): string {
 
 describe('Tests for Search', () => {
 
-    let userId;
-    let key;
-    const currentDate = new Date().getTime();
+    let userId: number;
+    let key: string;
+    const currentDate: number = new Date().getTime();
 
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
 
@@ -81,7 +82,7 @@ describe('Tests for Search', () => {
         }, 3000);
     });
 
-    function deleteIndexFolders(location) {
+    function deleteIndexFolders(location: string) {
         if (fs.existsSync(location)) {
             fs.readdirSync(location).forEach((file) => {
                 const curPath = path.join(location, file);
@@ -101,7 +102,6 @@ describe('Tests for Search', () => {
             setTimeout(() => {
 
                 expect(SearchApi.isInitialized).toBe(true);
-                expect(SearchApi.messageData).toEqual([]);
                 expect(SearchApi.isRealTimeIndexing).toBe(false);
 
                 done();
@@ -154,7 +154,7 @@ describe('Tests for Search', () => {
                 text: 'it works',
             }];
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: number) {
                 expect(indexBatch).toHaveBeenCalled();
                 expect(status).toBe(true);
                 expect(data).toBe(0);
@@ -165,7 +165,7 @@ describe('Tests for Search', () => {
 
         it('should not batch index', (done) => {
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(indexBatch).toHaveBeenCalled();
                 expect(status).toBe(false);
                 expect(data).toBe('Batch Indexing: Messages are required');
@@ -176,7 +176,7 @@ describe('Tests for Search', () => {
 
         it('should not batch index invalid object', (done) => {
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(indexBatch).toHaveBeenCalled();
                 expect(status).toBe(false);
                 expect(data).toEqual('Batch Indexing parse error');
@@ -197,7 +197,7 @@ describe('Tests for Search', () => {
                 text: 'it works',
             };
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(indexBatch).toHaveBeenCalled();
                 expect(status).toBe(false);
                 expect(data).toEqual('Batch Indexing: Messages must be an array');
@@ -219,7 +219,7 @@ describe('Tests for Search', () => {
                 text: 'it fails',
             } ];
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(indexBatch).toHaveBeenCalled();
                 expect(status).toBe(false);
                 expect(data).toEqual('Library not initialized');
@@ -233,7 +233,7 @@ describe('Tests for Search', () => {
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
             SearchApi.searchQuery('it works', [], [],
                 '', undefined, undefined, 25, 0,
-                0).then((res) => {
+                0).then((res: SearchResponse) => {
                 expect(res.messages.length).toEqual(3);
                 expect(searchQuery).toHaveBeenCalled();
                 done();
@@ -265,7 +265,7 @@ describe('Tests for Search', () => {
             SearchApi.searchQuery('realtime working', ['71811853189212'],
                 ['Au8O2xKHyX1LtE6zW019GX///rZYegAtdA=='],
                 '', undefined, undefined,
-                25, 0, 0).then((res) => {
+                25, 0, 0).then((res: SearchResponse) => {
                 expect(res.messages.length).toEqual(3);
                 expect(searchQuery).toHaveBeenCalled();
                 done();
@@ -295,7 +295,7 @@ describe('Tests for Search', () => {
 
                 SearchApi.searchQuery('isRealTimeIndexing', [], [], '',
                     undefined, undefined,
-                    25, 0, 0).then((res) => {
+                    25, 0, 0).then((res: SearchResponse) => {
                     expect(res.messages.length).toEqual(0);
                     done();
                 });
@@ -324,7 +324,7 @@ describe('Tests for Search', () => {
 
         it('should not realTime index invalid object', (done) => {
             const realTimeIndexing = jest.spyOn(SearchApi, 'realTimeIndexing');
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(realTimeIndexing).toHaveBeenCalled();
                 expect(status).toBe(false);
                 expect(data).toEqual('RealTime Indexing: parse error ');
@@ -335,7 +335,7 @@ describe('Tests for Search', () => {
 
         it('should fail no data is passed for real-time indexing', (done) => {
             const realTimeIndexing = jest.spyOn(SearchApi, 'realTimeIndexing');
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(realTimeIndexing).toHaveBeenCalled();
                 expect(status).toBe(false);
                 expect(data).toEqual('RealTime Indexing: parse error ');
@@ -357,7 +357,7 @@ describe('Tests for Search', () => {
             }];
             const realTimeIndexing = jest.spyOn(SearchApi, 'realTimeIndexing');
             SearchApi.isInitialized = false;
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 SearchApi.isInitialized = true;
                 expect(status).toBe(false);
                 expect(data).toEqual('Library not initialized');
@@ -405,7 +405,7 @@ describe('Tests for Search', () => {
 
         it('should get the latest timestamp', (done) => {
             const getLatestMessageTimestamp = jest.spyOn(SearchApi, 'getLatestMessageTimestamp');
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(status).toBe(true);
                 expect(data).toEqual(currentDate.toString());
                 expect(getLatestMessageTimestamp).toHaveBeenCalled();
@@ -417,7 +417,7 @@ describe('Tests for Search', () => {
         it('should not get the latest timestamp', (done) => {
             const getLatestMessageTimestamp = jest.spyOn(SearchApi, 'getLatestMessageTimestamp');
             SearchApi.isInitialized = false;
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(status).toBe(false);
                 expect(data).toEqual('Not initialized');
                 expect(getLatestMessageTimestamp).toHaveBeenCalled();
@@ -431,7 +431,7 @@ describe('Tests for Search', () => {
             const getLatestMessageTimestamp = jest.spyOn(SearchApi, 'getLatestMessageTimestamp');
             libSymphonySearch.symSEClearMainRAMIndex();
             libSymphonySearch.symSEClearRealtimeRAMIndex();
-            function handleResponse(status, data) {
+            function handleResponse(status: boolean, data: string) {
                 expect(data).toEqual('0000000000000');
                 expect(status).toBe(true);
                 expect(getLatestMessageTimestamp).toHaveBeenCalled();
@@ -459,7 +459,7 @@ describe('Tests for Search', () => {
                 const startTime = new Date().getTime() - (4 * 31 * 24 * 60 * 60 * 1000);
                 SearchApi.searchQuery('it works', [], [], '',
                     startTime.toString(), endTime.toString(),
-                    0, 0.2, 0.1).then((res) => {
+                    0, 0.2, 0.1).then((res: SearchResponse) => {
                     expect(res.messages.length).toEqual(3);
                     expect(searchQuery).toHaveBeenCalled();
                     done();
@@ -474,7 +474,7 @@ describe('Tests for Search', () => {
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
             SearchApi.isInitialized = false;
             SearchApi.searchQuery('it works', [], [], '',
-                '', '', 25, 0, 0).then((res) => {
+                '', '', 25, 0, 0).then((res: SearchResponse) => {
                 expect(res).toEqual({
                     messages: [],
                     more: 0,
@@ -490,7 +490,7 @@ describe('Tests for Search', () => {
         it('should filter search limit ', (done) => {
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
             SearchApi.searchQuery('works', [], [], '',
-                '', '', 2, 0, 0).then((res) => {
+                '', '', 2, 0, 0).then((res: SearchResponse) => {
                 expect(res.messages.length).toBe(2);
                 expect(searchQuery).toHaveBeenCalledTimes(6);
                 expect(searchQuery).toHaveBeenCalled();
@@ -503,7 +503,7 @@ describe('Tests for Search', () => {
             libSymphonySearch.symSEClearRealtimeRAMIndex();
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
             SearchApi.searchQuery('it works', [], [], '',
-                '', '', 25, 0, 0).then((res) => {
+                '', '', 25, 0, 0).then((res: SearchResponse) => {
                 expect(res.messages.length).toBe(0);
                 expect(searchQuery).toHaveBeenCalledTimes(7);
                 expect(searchQuery).toHaveBeenCalled();
@@ -519,7 +519,7 @@ describe('Tests for Search', () => {
                 const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
                 expect(SearchApi.isInitialized).toBe(true);
                 SearchApi.searchQuery(undefined, [], [], '',
-                    '', '', 25, 0, 0).then((res) => {
+                    '', '', 25, 0, 0).then((res: SearchResponse) => {
                     expect(res).toEqual({
                         messages: [],
                         more: 0,
@@ -536,7 +536,7 @@ describe('Tests for Search', () => {
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
             SearchApi.searchQuery('#123 "testing"', [], [],
                 'attachment', '', '', 25,
-                0, 0).then((res) => {
+                0, 0).then((res: SearchResponse) => {
                 expect(res.messages.length).toEqual(0);
                 expect(searchQuery).toHaveBeenCalled();
                 done();
@@ -546,7 +546,7 @@ describe('Tests for Search', () => {
         it('should search for pdf', (done) => {
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
             SearchApi.searchQuery('', [], [], 'pdf',
-                '', '', 25, 0, 0).then((res) => {
+                '', '', 25, 0, 0).then((res: SearchResponse) => {
                 expect(res.messages.length).toEqual(0);
                 expect(searchQuery).toHaveBeenCalled();
                 expect(searchQuery).toHaveBeenCalledTimes(3);
@@ -575,19 +575,19 @@ describe('Tests for Search', () => {
                 text: 'search',
             }];
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
-            function handleReponse(status, data) {
+            function handleResponse(status: boolean, data: number) {
                 expect(indexBatch).toHaveBeenCalled();
                 expect(status).toBe(true);
                 expect(data).toBe(0);
                 done();
             }
-            SearchApi.indexBatch(JSON.stringify(messages), handleReponse);
+            SearchApi.indexBatch(JSON.stringify(messages), handleResponse);
         });
 
         it('should search without quote', (done) => {
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
             SearchApi.searchQuery('search', [], [], undefined,
-                '', '', 25, 0, 0).then((res) => {
+                '', '', 25, 0, 0).then((res: SearchResponse) => {
                 expect(res.messages.length).toEqual(2);
                 expect(searchQuery).toHaveBeenCalled();
                 expect(searchQuery).toHaveBeenCalledTimes(4);
@@ -598,7 +598,7 @@ describe('Tests for Search', () => {
         it('should quote search', (done) => {
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
             SearchApi.searchQuery('\"quote search\"', [], [], undefined,
-                '', '', 25, 0, 0).then((res) => {
+                '', '', 25, 0, 0).then((res: SearchResponse) => {
                 expect(res.messages.length).toEqual(1);
                 expect(searchQuery).toHaveBeenCalled();
                 expect(searchQuery).toHaveBeenCalledTimes(5);
@@ -620,13 +620,13 @@ describe('Tests for Search', () => {
         it('should return error', (done) => {
             if (isMac) {
                 searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH = undefined;
-                SearchUtilsAPI.checkFreeSpace().then((res) => {
+                SearchUtilsAPI.checkFreeSpace().then((res: boolean) => {
                     expect(res).toEqual(false);
                     done();
                 });
             } else {
                 searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH = undefined;
-                SearchUtilsAPI.checkFreeSpace().then((res) => {
+                SearchUtilsAPI.checkFreeSpace().then((res: boolean) => {
                     expect(res).toEqual(false);
                     done();
                 });
@@ -641,7 +641,7 @@ describe('Tests for Search', () => {
                 searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE = path.join(__dirname, '..',
                     'node_modules/electron-utils/FreeDiskSpace/bin/Release/FreeDiskSpace.exe');
             }
-            SearchUtilsAPI.checkFreeSpace().catch((err) => {
+            SearchUtilsAPI.checkFreeSpace().catch((err: never) => {
                 searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE = path.join(__dirname, '..',
                     'library/FreeDiskSpace.exe');
                 expect(checkFreeSpace).toHaveBeenCalled();
@@ -657,7 +657,7 @@ describe('Tests for Search', () => {
             if (fs.existsSync(searchConfig.FOLDERS_CONSTANTS.USER_CONFIG_FILE)) {
                 fs.unlinkSync(searchConfig.FOLDERS_CONSTANTS.USER_CONFIG_FILE);
             }
-            SearchUtilsAPI.getSearchUserConfig(1234567891011).then((res) => {
+            SearchUtilsAPI.getSearchUserConfig(1234567891011).then((res: null) => {
                 expect(res).toBe(null);
                 done();
             });
@@ -672,7 +672,7 @@ describe('Tests for Search', () => {
 
         it('should exist users config file', (done) => {
             setTimeout(() => {
-                SearchUtilsAPI.getSearchUserConfig(1234567891011).then((res) => {
+                SearchUtilsAPI.getSearchUserConfig(1234567891011).then((res: UserConfig) => {
                     expect(res).toEqual({});
                     done();
                 });
@@ -685,7 +685,7 @@ describe('Tests for Search', () => {
                 version: 1,
                 language: 'en',
             };
-            SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res) => {
+            SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res: UserConfig) => {
                 expect(res.indexVersion).toEqual('v1');
                 done();
             });
@@ -697,7 +697,7 @@ describe('Tests for Search', () => {
                 version: 1,
                 language: 'en',
             };
-            SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res) => {
+            SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res: UserConfig) => {
                 expect(res.rotationId).toEqual(1);
                 expect(res.indexVersion).toEqual('v1');
                 done();
@@ -705,7 +705,7 @@ describe('Tests for Search', () => {
         });
 
         it('should create user if not exist', (done) => {
-            SearchUtilsAPI.getSearchUserConfig(2234567891011).catch((err) => {
+            SearchUtilsAPI.getSearchUserConfig(2234567891011).catch((err: null) => {
                 expect(err).toEqual(null);
                 done();
             });

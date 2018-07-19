@@ -1,12 +1,13 @@
 import { log } from '../log/log';
 import { logLevels } from '../log/logLevels';
+import { Message } from "../interface/interface";
 
-let messagesData: any[] = [];
+let messagesData: Message[] = [];
 
 const makeBoundTimedCollector = (isIndexing: any, timeout: any, callback: any) => {
     let timer: any;
 
-    return (...args: any[]) => {
+    return (...args: Message[]) => {
         if (!timer) {
             timer = setTimeout(() => {
                 if (!isIndexing()) {
@@ -23,7 +24,7 @@ const makeBoundTimedCollector = (isIndexing: any, timeout: any, callback: any) =
         }
     };
 
-    function handleRealTimeResponse(status: any, response: any): void {
+    function handleRealTimeResponse(status: boolean, response: string): void {
         if (status) {
             log.send(logLevels.INFO, response);
         } else {
@@ -32,7 +33,7 @@ const makeBoundTimedCollector = (isIndexing: any, timeout: any, callback: any) =
 
     }
 
-    function flush(this: any, queue: any) {
+    function flush(this: any, queue: Message[]): void {
         clearTimeout(timer);
         timer = null;
         resetQueue();
@@ -41,11 +42,11 @@ const makeBoundTimedCollector = (isIndexing: any, timeout: any, callback: any) =
         }
     }
 
-    function getQueue() {
+    function getQueue(): Message[] {
         return messagesData;
     }
 
-    function resetQueue() {
+    function resetQueue(): void {
         messagesData = [];
     }
 };

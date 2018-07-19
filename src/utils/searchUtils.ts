@@ -155,7 +155,7 @@ function updateConfig(this: SearchUtils, userId: string, data: UserConfig, resol
         oldConfig = JSON.parse(oldData);
     } catch (e) {
         createUserConfigFile.call(this, userId, data);
-        return reject(new Error('can not parse user config file data: ' + e));
+        return reject('can not parse user config file data: ' + e);
     }
 
     const newConfig = Object.assign({}, oldConfig);

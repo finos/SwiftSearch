@@ -10,7 +10,7 @@ import { logLevels } from './log/logLevels';
 import { compression, decompression } from './compressionLib/compression';
 import { libSymphonySearch } from './searchLibrary';
 import SearchUtils from './utils/searchUtils';
-import { UserConfig, Std } from './interface/interface';
+import { UserConfig, Std, SearchResponse, Message } from './interface/interface';
 
 /**
  * This search class communicates with the SymphonySearchEngine C library via node-ffi.
@@ -154,7 +154,7 @@ export default class Search extends SearchUtils {
      * @param {Array} messages
      * @param callback
      */
-    public indexBatch(messages: any, callback: any): any {
+    public indexBatch(messages: string, callback: any): any {
         if (typeof callback !== 'function') {
             return false;
         }
@@ -196,7 +196,7 @@ export default class Search extends SearchUtils {
      * messages for queue and flush
      * @param {Object} message
      */
-    public batchRealTimeIndexing(message: object): void {
+    public batchRealTimeIndexing(message: Message[]): void {
         this.collector(message);
     }
 
@@ -297,7 +297,7 @@ export default class Search extends SearchUtils {
      * @returns {Promise}
      */
     public searchQuery(query: string, senderIds: string[], threadIds: string[], fileType: string, startDate: string,
-                       endDate: string, limit: number, offset: number, sortOrder: number): Promise<object> {
+                       endDate: string, limit: number, offset: number, sortOrder: number): Promise<SearchResponse> {
 
         let _limit = limit;
         let _offset = offset;
