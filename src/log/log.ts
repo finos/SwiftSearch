@@ -9,7 +9,7 @@ const MAX_LOG_QUEUE_LENGTH = 100;
 
 let electronLog;
 
-class Logger {
+export class Logger {
     private logQueue: any[];
     private logWindow: any;
 
