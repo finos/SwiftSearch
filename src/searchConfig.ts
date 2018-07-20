@@ -23,7 +23,7 @@ const userConfigFile = isDevEnv ? path.join(__dirname, '..', userConfigFileName)
 
 const libraryFolderPath = isMac ? macLibraryPath : winLibraryPath;
 
-const pathToUtils = isDevEnv ? path.join(__dirname, '../node_modules/electron-utils') : winLibraryPath;
+const pathToUtils = isDevEnv ? path.join(__dirname, '../../node_modules/electron-utils') : winLibraryPath;
 const freeDiskSpace = path.join(pathToUtils, isDevEnv ? 'FreeDiskSpace/bin/Release/FreeDiskSpace.exe' : 'FreeDiskSpace.exe');
 
 const libraryPaths = {
