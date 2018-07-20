@@ -2,6 +2,8 @@ import * as fs from 'fs';
 import { checkDiskSpace } from './checkDiskSpace';
 import { searchConfig } from '../searchConfig';
 import { UserConfig } from '../interface/interface';
+import { log } from '../log/log';
+import { logLevels } from '../log/logLevels';
 
 /**
  * Utils to validate users config data and
@@ -96,7 +98,7 @@ function createUser(userId: string, oldConfig: UserConfig): void {
 
     fs.writeFile(configPath, jsonNewConfig, 'utf8', (err) => {
         if (err) {
-            console.log('error');
+            log.send(logLevels.ERROR, 'Error creating new user');
         }
     });
 }

@@ -59,7 +59,7 @@ export interface LogWindow {
 interface Entities {
     hashtags: any[];
     cashtags: any[];
-    userMentions: any[]
+    userMentions: any[];
 }
 
 /**

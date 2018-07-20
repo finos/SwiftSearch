@@ -31,7 +31,6 @@ async function checkDiskSpace(): Promise<boolean> {
                 const diskInfoStr = data[data.length - 1].replace( /[\s\n\r]+/g, ' ');
                 const freeSpace: string[] = diskInfoStr.split(' ');
                 const space: number = parseInt(freeSpace[ 3 ], 10) * 1024;
-                console.log(space);
                 return space >= searchConfig.MINIMUM_DISK_SPACE;
             }
             return false;
