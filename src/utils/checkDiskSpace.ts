@@ -2,8 +2,6 @@ import * as util from 'util';
 import * as childProcess from 'child_process';
 import { isMac } from './misc';
 import { searchConfig } from '../searchConfig';
-import { log } from '../log/log';
-import { logLevels } from '../log/logLevels';
 
 const exec = util.promisify(childProcess.exec);
 
@@ -22,41 +20,49 @@ async function checkDiskSpace(): Promise<boolean> {
     }
 
     if (isMac) {
-        const { stdout, stderr } = await exec("df -k '" + userDataPath.replace(/'/g, "'\\''") + "'");
-        if (stderr) {
-            if (stderr.indexOf(searchConfig.MAC_PATH_ERROR) !== -1) {
-                return false;
+        let response: any;
+        try {
+            // This is temporary until we have a fix for https://github.com/electron/electron/issues/13458 issue
+            response = await exec("df -k '" + userDataPath.replace(/'/g, "'\\''") + "'");
+            if (response) {
+
+                const data = response.trim().split('\n');
+
+                const diskInfoStr = data[data.length - 1].replace( /[\s\n\r]+/g, ' ');
+                const freeSpace: string[] = diskInfoStr.split(' ');
+                const space: number = parseInt(freeSpace[ 3 ], 10) * 1024;
+                console.log(space);
+                return space >= searchConfig.MINIMUM_DISK_SPACE;
             }
             return false;
+        } catch (e) {
+            return false;
         }
-
-        const data = stdout.trim().split('\n');
-
-        const diskInfoStr = data[data.length - 1].replace( /[\s\n\r]+/g, ' ');
-        const freeSpace: string[] = diskInfoStr.split(' ');
-        const space: number = parseInt(freeSpace[ 3 ], 10) * 1024;
-        return space >= searchConfig.MINIMUM_DISK_SPACE;
 
     } else {
-        const { stdout, stderr } = await exec(`"${searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE}" ${userDataPath}`);
+        let response: any;
 
-        if (stderr) {
-            log.send(logLevels.ERROR, `Error retrieving free disk space : ${stderr}`);
-            log.send(logLevels.ERROR, `Error stderr: ${stderr}`);
-        }
+        try {
+            // This is temporary until we have a fix for https://github.com/electron/electron/issues/13458 issue
+            response = await exec(`"${searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE}" ${userDataPath}`);
+            if (response) {
+                const data: string[] = response.trim().split(',');
 
-        const data: string[] = stdout.trim().split(',');
+                if (data[ 1 ] === searchConfig.DISK_NOT_READY) {
+                    return false;
+                }
 
-        if (data[ 1 ] === searchConfig.DISK_NOT_READY) {
+                if (data[ 1 ] === searchConfig.DISK_NOT_FOUND) {
+                    return false;
+                }
+
+                const diskInfoStr: number = parseInt(data[ 0 ], 10);
+                return diskInfoStr >= searchConfig.MINIMUM_DISK_SPACE;
+            }
+            return false;
+        } catch (e) {
             return false;
         }
-
-        if (data[ 1 ] === searchConfig.DISK_NOT_FOUND) {
-            return false;
-        }
-
-        const diskInfoStr: number = parseInt(data[ 0 ], 10);
-        return diskInfoStr >= searchConfig.MINIMUM_DISK_SPACE;
     }
 }
 
