@@ -641,11 +641,11 @@ describe('Tests for Search', () => {
                 searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE = path.join(__dirname, '..',
                     'node_modules/electron-utils/FreeDiskSpace/bin/Release/FreeDiskSpace.exe');
             }
-            SearchUtilsAPI.checkFreeSpace().catch((err: never) => {
+            SearchUtilsAPI.checkFreeSpace().then((err: never) => {
                 searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE = path.join(__dirname, '..',
                     'library/FreeDiskSpace.exe');
                 expect(checkFreeSpace).toHaveBeenCalled();
-                expect(err).toBeTruthy();
+                expect(err).toBe(false);
                 done();
             });
         });
