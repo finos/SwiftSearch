@@ -1,7 +1,7 @@
 ## Prerequisites
 
 ### General
-- You'll need a set of binaries for swift search to work. To get these binaries, please contact the project maintainers
+- You'll need a set of binaries for swift search to work. To get these binaries, please contact the project maintainers.
 
 ### Windows
 - NodeJS version >= 8.9.4 (corresponds to electron 2.0.2)
