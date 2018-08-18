@@ -1,7 +1,7 @@
 'use strict';
 
 import * as fs from 'fs';
-import * as ref from 'ref';
+import * as ref from 'ref-napi';
 import * as path from 'path';
 import { makeBoundTimedCollector } from './utils/queue';
 import { searchConfig } from './searchConfig';

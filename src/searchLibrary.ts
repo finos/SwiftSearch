@@ -1,7 +1,7 @@
 'use strict';
 
-import * as ffi from 'ffi';
-import * as ref from 'ref';
+import * as ffi from 'ffi-napi';
+import * as ref from 'ref-napi';
 
 import { searchConfig } from './searchConfig';
 
