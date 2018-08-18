@@ -1,9 +1,9 @@
-import * as util from 'util';
 import * as childProcess from 'child_process';
-import { isMac } from './misc';
-import { searchConfig } from '../searchConfig';
+import * as util from 'util';
 import { log } from '../log/log';
 import { logLevels } from '../log/logLevels';
+import { searchConfig } from '../searchConfig';
+import { isMac } from './misc';
 
 const exec = util.promisify(childProcess.exec);
 

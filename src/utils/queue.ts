@@ -1,6 +1,6 @@
+import { Message } from '../interface/interface';
 import { log } from '../log/log';
 import { logLevels } from '../log/logLevels';
-import { Message } from '../interface/interface';
 
 let messagesData: Message[] = [];
 

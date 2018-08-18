@@ -1,8 +1,8 @@
 import { app } from 'electron';
 import * as path from 'path';
+import { ElectronLogInterface, LogWindow } from '../interface/interface';
 import { getCmdLineArg } from '../utils/getCmdLineArg';
 import { logLevels } from './logLevels';
-import { ElectronLogInterface, LogWindow } from '../interface/interface';
 
 const MAX_LOG_QUEUE_LENGTH = 100;
 
@@ -42,8 +42,8 @@ export class Logger {
         }
 
         const logMsg = {
-            level,
             details,
+            level,
             startTime: Date.now(),
         };
 

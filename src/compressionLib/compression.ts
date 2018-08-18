@@ -1,8 +1,8 @@
 import * as child from 'child_process';
 import * as path from 'path';
-import { isMac, isDevEnv} from '../utils/misc';
-import { searchConfig } from '../searchConfig';
 import { Std } from '../interface/interface';
+import { searchConfig } from '../searchConfig';
+import { isDevEnv, isMac} from '../utils/misc';
 
 const ROOT_PATH = isDevEnv ? path.join(__dirname, '..', '..') : searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH;
 

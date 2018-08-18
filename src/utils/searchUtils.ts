@@ -1,9 +1,9 @@
 import * as fs from 'fs';
-import { checkDiskSpace } from './checkDiskSpace';
-import { searchConfig } from '../searchConfig';
 import { UserConfig } from '../interface/interface';
 import { log } from '../log/log';
 import { logLevels } from '../log/logLevels';
+import { searchConfig } from '../searchConfig';
+import { checkDiskSpace } from './checkDiskSpace';
 
 /**
  * Utils to validate users config data and

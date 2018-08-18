@@ -5,12 +5,12 @@ import keyMirror = require('keymirror');
  * @type {Object}
  */
 const logLevels = keyMirror({
-    ERROR: null,
-    CONFLICT: null,
-    WARN: null,
     ACTION: null,
-    INFO: null,
+    CONFLICT: null,
     DEBUG: null,
+    ERROR: null,
+    INFO: null,
+    WARN: null,
 });
 
 export { logLevels };

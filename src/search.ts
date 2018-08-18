@@ -1,14 +1,14 @@
 import * as fs from 'fs';
-import * as ref from 'ref-napi';
 import * as path from 'path';
-import { makeBoundTimedCollector } from './utils/queue';
-import { searchConfig } from './searchConfig';
+import * as ref from 'ref-napi';
+import { compression, decompression } from './compressionLib/compression';
+import { Message, SearchResponse, Std, UserConfig } from './interface/interface';
 import { log } from './log/log';
 import { logLevels } from './log/logLevels';
-import { compression, decompression } from './compressionLib/compression';
+import { searchConfig } from './searchConfig';
 import { libSymphonySearch } from './searchLibrary';
+import { makeBoundTimedCollector } from './utils/queue';
 import SearchUtils from './utils/searchUtils';
-import { UserConfig, Std, SearchResponse, Message } from './interface/interface';
 
 /**
  * This search class communicates with the SymphonySearchEngine C library via node-ffi.
@@ -297,9 +297,9 @@ export default class Search extends SearchUtils {
     public searchQuery(query: string, senderIds: string[], threadIds: string[], fileType: string, startDate: string,
                        endDate: string, limit: number, offset: number, sortOrder: number): Promise<SearchResponse> {
 
-        let _limit = limit;
-        let _offset = offset;
-        let _sortOrder = sortOrder;
+        let LIMIT = limit;
+        let OFFSET = offset;
+        let SORT_ORDER = sortOrder;
 
         return new Promise((resolve) => {
             if (!this.isInitialized) {
@@ -342,19 +342,19 @@ export default class Search extends SearchUtils {
                 }
             }
 
-            if (!_limit || typeof _limit !== 'number' || Math.round(_limit) !== _limit) {
-                _limit = 25;
+            if (!LIMIT || typeof LIMIT !== 'number' || Math.round(LIMIT) !== LIMIT) {
+                LIMIT = 25;
             }
 
-            if (!_offset || typeof _offset !== 'number' || Math.round(_offset) !== _offset) {
-                _offset = 0;
+            if (!OFFSET || typeof OFFSET !== 'number' || Math.round(OFFSET) !== OFFSET) {
+                OFFSET = 0;
             }
 
-            if (!_sortOrder || typeof _sortOrder !== 'number' || Math.round(_sortOrder) !== _sortOrder) {
-                _sortOrder = searchConfig.SORT_BY_SCORE;
+            if (!SORT_ORDER || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
+                SORT_ORDER = searchConfig.SORT_BY_SCORE;
             }
 
-            const returnedResult = libSymphonySearch.symSERAMIndexSearch(q, startDateTime.toString(), endDateTime.toString(), _offset, _limit, _sortOrder);
+            const returnedResult = libSymphonySearch.symSERAMIndexSearch(q, startDateTime.toString(), endDateTime.toString(), OFFSET, LIMIT, SORT_ORDER);
             try {
                 const ret = ref.readCString(returnedResult);
                 resolve(JSON.parse(ret));
@@ -607,10 +607,10 @@ function isFileExist(this: Search, type: string): boolean {
     }
 
     const paths: any = {
-        USER_INDEX_PATH: path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
-            `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`),
         LZ4: path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}${searchConfig.TAR_LZ4_EXT}`),
+        USER_INDEX_PATH: path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
+            `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`),
     };
 
     searchPath = paths[type];

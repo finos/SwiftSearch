@@ -1,5 +1,9 @@
 import { remote } from 'electron';
 
+declare global {
+    interface Window { ssf: any; }
+}
+
 let Search;
 
 try {
@@ -18,7 +22,7 @@ try {
     console.warn('Failed to initialize');
 }
 
-window['ssf'] = {
-    Search: Search,
-    SearchUtils: SearchUtils,
+window.ssf = {
+    Search,
+    SearchUtils,
 };
