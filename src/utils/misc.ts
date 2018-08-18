@@ -1,4 +1,3 @@
-'use strict';
 import * as os from 'os';
 
 const isDevEnv: boolean = process.env.ELECTRON_DEV ?

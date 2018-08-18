@@ -1,6 +1,7 @@
 import * as electron from 'electron';
 import { isDevEnv, isMac } from './utils/misc';
 import * as path from 'path';
+
 const app = electron.app;
 const userData = path.join(app.getPath('userData'));
 const execPath = path.dirname(app.getPath('exe'));

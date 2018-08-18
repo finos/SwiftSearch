@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Search Utils return types interface
  */

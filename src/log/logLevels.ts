@@ -1,5 +1,3 @@
-'use strict';
-
 import keyMirror = require('keymirror');
 
 /**
