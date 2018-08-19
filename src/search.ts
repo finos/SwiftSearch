@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as ref from 'ref-napi';
 import { compression, decompression } from './compressionLib/compression';
-import { Message, SearchResponse, Std, UserConfig } from './interface/interface';
+import { Message, SearchResponse, UserConfig } from './interface/interface';
 import { log } from './log/log';
 import { logLevels } from './log/logLevels';
 import { searchConfig } from './searchConfig';
@@ -130,12 +130,11 @@ export default class Search extends SearchUtils {
         const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
         if (isFileExist.call(this, 'LZ4') && !reIndex) {
-            decompression(`${userIndexPath}${searchConfig.TAR_LZ4_EXT}`, (status: boolean, response: Std) => {
+            decompression(`${userIndexPath}${searchConfig.TAR_LZ4_EXT}`, (status: boolean) => {
                 if (!status && !isFileExist.call(this, 'USER_INDEX_PATH')) {
                     log.send(logLevels.INFO, 'Creating new index');
                     fs.mkdirSync(userIndexPath);
                 }
-                log.send(logLevels.INFO, `Decompression success with response ${response}` );
                 this.init(key);
             });
         } else {
@@ -268,11 +267,10 @@ export default class Search extends SearchUtils {
                     return;
                 }
                 const userIndexPath: string = `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`;
-                compression(userIndexPath, userIndexPath, (status: boolean, response: Std) => {
+                compression(userIndexPath, userIndexPath, (status: boolean) => {
                     if (!status) {
                         log.send(logLevels.ERROR, 'Error Compressing Main Index Folder');
                     }
-                    log.send(logLevels.INFO, 'Compressing Main Index Folder -> ' + response);
                     clearSearchData.call(this);
                 });
                 resolve();

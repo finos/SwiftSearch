@@ -1,9 +1,12 @@
-import * as child from 'child_process';
+import * as childProcess from 'child_process';
 import * as path from 'path';
-import { Std } from '../interface/interface';
+import * as util from 'util';
+import { log } from '../log/log';
+import { logLevels } from '../log/logLevels';
 import { searchConfig } from '../searchConfig';
 import { isDevEnv, isMac} from '../utils/misc';
 
+const exec = util.promisify(childProcess.exec);
 const ROOT_PATH = isDevEnv ? path.join(__dirname, '..', '..') : searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH;
 
 /**
@@ -14,33 +17,31 @@ const ROOT_PATH = isDevEnv ? path.join(__dirname, '..', '..') : searchConfig.FOL
  * @param outputPath
  * @param callback
  */
-function compression(pathToFolder: string, outputPath: string, callback: (status: boolean, response: Std) => void) {
+async function compression(pathToFolder: string, outputPath: string, callback: (status: boolean) => void) {
     if (isMac) {
-        child.exec(`cd "${ROOT_PATH}" && tar cf - "${pathToFolder}" | "${searchConfig.LIBRARY_CONSTANTS.MAC_LIBRARY_FOLDER}/lz4.exec" > "${outputPath}.tar.lz4"`, (error, stdout, stderr) => {
-            if (error) {
-                return callback(false, {
-                    stderr: '',
-                    stdout: '',
-                });
+        try {
+            const { stdout, stderr } = await exec(`cd "${ROOT_PATH}" && tar cf - "${pathToFolder}" | "${searchConfig.LIBRARY_CONSTANTS.MAC_LIBRARY_FOLDER}/lz4.exec" > "${outputPath}.tar.lz4"`);
+            if (stderr) {
+                log.send(logLevels.INFO, `compression stderr: ${stderr}`);
             }
-            return callback(true, {
-                stderr: stderr.toString().trim(),
-                stdout: stdout.toString().trim(),
-            });
-        });
+            log.send(logLevels.INFO, `compression success stdout: ${stdout}`);
+            return callback(true);
+        } catch (e) {
+            log.send(logLevels.INFO, `compression failed with error: ${e}`);
+            return callback(false);
+        }
     } else {
-        child.exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" cf - "${pathToFolder}" | "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" > "${outputPath}.tar.lz4"`, (error, stdout, stderr) => {
-            if (error) {
-                return callback(false, {
-                    stderr: '',
-                    stdout: '',
-                });
+        try {
+            const { stdout, stderr } = await exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" cf - "${pathToFolder}" | "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" > "${outputPath}.tar.lz4"`);
+            if (stderr) {
+                log.send(logLevels.INFO, `compression stderr: ${stderr}`);
             }
-            return callback(true, {
-                stderr: stderr.toString().trim(),
-                stdout: stdout.toString().trim(),
-            });
-        });
+            log.send(logLevels.INFO, `compression success stdout: ${stdout}`);
+            return callback(true);
+        } catch (e) {
+            log.send(logLevels.INFO, `compression failed with error: ${e}`);
+            return callback(false);
+        }
     }
 }
 
@@ -51,33 +52,31 @@ function compression(pathToFolder: string, outputPath: string, callback: (status
  * @param pathName
  * @param callback
  */
-function decompression(pathName: string, callback: (status: boolean, response: Std) => void) {
+async function decompression(pathName: string, callback: (status: boolean) => void) {
     if (isMac) {
-        child.exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.MAC_LIBRARY_FOLDER}/lz4.exec" -d "${pathName}" | tar -xf - `, (error, stdout, stderr) => {
-            if (error) {
-                return callback(false, {
-                    stderr: '',
-                    stdout: '',
-                });
+        try {
+            const { stdout, stderr } = await exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.MAC_LIBRARY_FOLDER}/lz4.exec" -d "${pathName}" | tar -xf - `);
+            if (stderr) {
+                log.send(logLevels.INFO, `decompression stderr: ${stderr}`);
             }
-            return callback(true, {
-                stderr: stderr.toString().trim(),
-                stdout: stdout.toString().trim(),
-            });
-        });
+            log.send(logLevels.INFO, `decompression success stdout: ${stdout}`);
+            return callback(true);
+        } catch (e) {
+            log.send(logLevels.INFO, `decompression failed with error: ${e}`);
+            return callback(false);
+        }
     } else {
-        child.exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" -d "${pathName}" | "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" xf - `, (error, stdout, stderr) => {
-            if (error) {
-                return callback(false, {
-                    stderr: stderr.toString().trim(),
-                    stdout: stdout.toString().trim(),
-                });
+        try {
+            const { stdout, stderr } = await exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" -d "${pathName}" | "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" xf - `);
+            if (stderr) {
+                log.send(logLevels.INFO, `decompression stderr: ${stderr}`);
             }
-            return callback(false, {
-                stderr: stderr.toString().trim(),
-                stdout: stdout.toString().trim(),
-            });
-        });
+            log.send(logLevels.INFO, `decompression success stdout: ${stdout}`);
+            return callback(true);
+        } catch (e) {
+            log.send(logLevels.INFO, `decompression failed with error: ${e}`);
+            return callback(false);
+        }
     }
 }
 

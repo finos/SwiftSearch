@@ -1,7 +1,7 @@
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
+import { SearchResponse, UserConfig } from '../src/interface/interface';
 import {isMac, isWindowsOS} from '../src/utils/misc';
-import { UserConfig, SearchResponse } from "../src/interface/interface";
 
 let executionPath: string = '';
 let userConfigDir: string = '';
@@ -14,8 +14,8 @@ let libSymphonySearch: any;
 jest.mock('electron', (): object => {
     return {
         app: {
-            getPath: mockedGetPath,
             getName: mockedGetName,
+            getPath: mockedGetPath,
         },
     };
 });
@@ -126,32 +126,32 @@ describe('Tests for Search', () => {
 
         it('should index in a batch', (done) => {
             const messages = [{
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'it works',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             }, {
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDeU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'it works',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             }, {
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDrU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'it works',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             }];
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
             function handleResponse(status: boolean, data: number) {
@@ -187,14 +187,14 @@ describe('Tests for Search', () => {
 
         it('should not batch index parse error', (done) => {
             const message = {
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'it works',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             };
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
             function handleResponse(status: boolean, data: string) {
@@ -209,14 +209,14 @@ describe('Tests for Search', () => {
         it('should not batch index isInitialized is false', (done) => {
             SearchApi.isInitialized = false;
             const message = [ {
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'it fails',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             } ];
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
             function handleResponse(status: boolean, data: string) {
@@ -245,14 +245,14 @@ describe('Tests for Search', () => {
 
         it('should index realTime message', () => {
             const message = [{
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'realtime working',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             }];
 
             const batchRealTimeIndexing = jest.spyOn(SearchApi, 'batchRealTimeIndexing');
@@ -274,14 +274,14 @@ describe('Tests for Search', () => {
 
         it('should not index realTime message', (done) => {
             const message = [{
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'isRealTimeIndexing',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             }];
 
             const batchRealTimeIndexing = jest.spyOn(SearchApi, 'batchRealTimeIndexing');
@@ -304,14 +304,14 @@ describe('Tests for Search', () => {
 
         it('should not call the real-time index', () => {
             const message = [{
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'isRealTimeIndexing',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             }];
 
             const batchRealTimeIndexing = jest.spyOn(SearchApi, 'batchRealTimeIndexing');
@@ -346,14 +346,14 @@ describe('Tests for Search', () => {
 
         it('should fail library not initialized', (done) => {
             const message = [{
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'isRealTimeIndexing',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             }];
             const realTimeIndexing = jest.spyOn(SearchApi, 'realTimeIndexing');
             SearchApi.isInitialized = false;
@@ -556,23 +556,23 @@ describe('Tests for Search', () => {
 
         it('should index for testing quote', (done) => {
             const messages = [{
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
-                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'quote search',
-            }, {
-                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
                 threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-                ingestionDate: currentDate.toString(),
-                senderId: '71811853189212',
+            }, {
                 chatType: 'CHATROOM',
+                ingestionDate: currentDate.toString(),
                 isPublic: 'false',
+                messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'search',
+                threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
             }];
             const indexBatch = jest.spyOn(SearchApi, 'indexBatch');
             function handleResponse(status: boolean, data: number) {
@@ -681,9 +681,9 @@ describe('Tests for Search', () => {
 
         it('should update user config file', (done) => {
             const data = {
+                language: 'en',
                 rotationId: 0,
                 version: 1,
-                language: 'en',
             };
             SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res: UserConfig) => {
                 expect(res.indexVersion).toEqual('v1');
@@ -693,9 +693,9 @@ describe('Tests for Search', () => {
 
         it('should modify user config file', (done) => {
             const data = {
+                language: 'en',
                 rotationId: 1,
                 version: 1,
-                language: 'en',
             };
             SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res: UserConfig) => {
                 expect(res.rotationId).toEqual(1);
