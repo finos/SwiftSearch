@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as ref from 'ref-napi';
 import { compression, decompression } from './compressionLib/compression';
-import { Message, SearchResponse, UserConfig } from './interface/interface';
+import { Message, SearchInterface, SearchResponse, UserConfig } from './interface/interface';
 import { log } from './log/log';
 import { logLevels } from './log/logLevels';
 import { searchConfig } from './searchConfig';
@@ -15,7 +15,7 @@ import SearchUtils from './utils/searchUtils';
  * There should be only 1 instance of this class in the Electron
  */
 
-export default class Search extends SearchUtils {
+export default class Search extends SearchUtils implements SearchInterface {
     public readonly userId: string;
     private isInitialized: boolean;
     private isRealTimeIndexing: boolean;
@@ -212,7 +212,7 @@ export default class Search extends SearchUtils {
      * @param messages
      * @param callback
      */
-    public realTimeIndexing(messages: string, callback: any): any {
+    public realTimeIndexing(messages: string, callback: (status: boolean, message: string) => void): void | boolean | null {
         if (typeof callback !== 'function') {
             return false;
         }
@@ -367,7 +367,7 @@ export default class Search extends SearchUtils {
      * from the indexed data
      * @param callback
      */
-    public getLatestMessageTimestamp(callback: any): any {
+    public getLatestMessageTimestamp(callback: any): boolean | void | null {
         if (typeof callback !== 'function') {
             return false;
         }

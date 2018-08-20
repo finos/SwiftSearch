@@ -103,7 +103,6 @@ const loggerInstance = new Logger();
  * Initializes the electron logger for local logging
  */
 function initializeLocalLogger() {
-// eslint-disable-next-line global-require
     electronLog = require('electron-log');
     electronLog.transports.file.file = path.join(app.getPath('logs'), 'app.log');
     electronLog.transports.file.level = 'debug';

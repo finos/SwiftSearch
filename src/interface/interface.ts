@@ -1,12 +1,4 @@
 /**
- * Search Utils return types interface
- */
-export interface Std {
-    stderr: string;
-    stdout: string;
-}
-
-/**
  * Search User Config interface
  */
 export interface UserConfig {
@@ -90,4 +82,33 @@ export interface SearchResponse {
     more: number;
     returned: number;
     total: number;
+}
+
+/**
+ * SearchInterface
+ */
+export interface SearchInterface {
+    getUserConfig(key: string): void;
+    isLibInit(): boolean;
+    init(key: string): void;
+    decompress(key: string, reIndex: boolean): void;
+    indexBatch(messages: string, callback: any): any;
+    batchRealTimeIndexing(message: Message[]): void;
+    checkIsRealTimeIndexing(): boolean;
+    realTimeIndexing(messages: string, callback: (status: boolean, message: string) => void): void | boolean | null;
+    encryptIndex(key: string): Promise<void>;
+    searchQuery(query: string, senderIds: string[], threadIds: string[], fileType: string, startDate: string,
+                endDate: string, limit: number, offset: number, sortOrder: number): Promise<SearchResponse>;
+    getLatestMessageTimestamp(callback: any): boolean | void | null;
+    deleteRealTimeFolder(): void;
+    constructQuery(searchQuery: string, senderId: string[], threadId: string[], fileType: string): string;
+}
+
+/**
+ * SearchUtilsInterface
+ */
+export interface SearchUtilsInterface {
+    checkFreeSpace(): Promise<boolean>;
+    getSearchUserConfig(userId: string): Promise<UserConfig>;
+    updateUserConfig(userId: string, data: UserConfig): Promise<UserConfig>;
 }

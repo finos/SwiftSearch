@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { UserConfig } from '../interface/interface';
+import { SearchUtilsInterface, UserConfig } from '../interface/interface';
 import { log } from '../log/log';
 import { logLevels } from '../log/logLevels';
 import { searchConfig } from '../searchConfig';
@@ -9,8 +9,7 @@ import { checkDiskSpace } from './checkDiskSpace';
  * Utils to validate users config data and
  * available disk space to enable electron search
  */
-/*eslint class-methods-use-this: ["error", { "exceptMethods": ["checkFreeSpace"] }] */
-export default class SearchUtils {
+export default class SearchUtils implements SearchUtilsInterface {
     public readonly indexVersion: string;
 
     constructor() {
