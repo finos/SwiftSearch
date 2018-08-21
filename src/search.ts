@@ -45,16 +45,16 @@ export default class Search extends SearchUtils implements SearchInterface {
             .then((config: UserConfig) => {
                 if (config.indexVersion === searchConfig.INDEX_VERSION) {
                     /**
-                     * decompress passing false as 2nd arg creates
-                     * a new index without decrypting the old
-                     * index
+                     * decompress passing false as 2nd arg
+                     * decrypts the previously stored index
                      */
                     this.decompress(key, false);
                     return;
                 }
                 /**
-                 * decompress passing true as 2nd arg
-                 * decrypts the previously stored index
+                 * decompress passing true as 2nd arg creates
+                 * a new index without decrypting the old
+                 * index
                  */
                 this.decompress(key, true);
 
