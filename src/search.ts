@@ -41,7 +41,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * @param key
      */
     public getUserConfig(key: string): void {
-        this.getSearchUserConfig(this.userId)
+        super.getSearchUserConfig(this.userId)
             .then((config: UserConfig) => {
                 if (config.indexVersion === searchConfig.INDEX_VERSION) {
                     /**
@@ -49,7 +49,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                      * a new index without decrypting the old
                      * index
                      */
-                    this.decompress(key, true);
+                    this.decompress(key, false);
                     return;
                 }
                 /**
@@ -63,7 +63,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 const userConfig: UserConfig = config;
                 if (userConfig && userConfig.indexVersion) {
                     userConfig.indexVersion = searchConfig.INDEX_VERSION;
-                    this.updateUserConfig(this.userId, userConfig)
+                    super.updateUserConfig(this.userId, userConfig)
                         .catch(() => {
                             log.send(logLevels.ERROR, 'Error updating index version user config');
                         });
