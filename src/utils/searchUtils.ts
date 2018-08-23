@@ -78,7 +78,7 @@ function readFile(this: SearchUtils, userId: string, resolve: any, reject: any) 
         });
     } else {
         createUserConfigFile.call(this, userId, undefined);
-        resolve(null);
+        return resolve(null);
     }
 }
 

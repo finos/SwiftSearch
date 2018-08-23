@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as ref from 'ref-napi';
+import * as ref from 'ref';
 import { compression, decompression } from './compressionLib/compression';
 import { Message, SearchInterface, SearchResponse, UserConfig } from './interface/interface';
 import { log } from './log/log';
