@@ -579,10 +579,20 @@ function clearSearchData(this: Search): void {
                 if (fs.lstatSync(curPath).isDirectory()) {
                     removeFiles(curPath);
                 } else {
-                    fs.unlinkSync(curPath);
+                    try {
+                        fs.unlinkSync(curPath);
+                    } catch (e) {
+                        log.send(logLevels.WARN, 'clearSearchData -> Error removing index file ' +
+                            '(nothing to worry this will be replaced by lz4 extraction)');
+                    }
                 }
             });
-            fs.rmdirSync(filePath);
+            try {
+                fs.rmdirSync(filePath);
+            } catch (e) {
+                log.send(logLevels.WARN, 'clearSearchData -> Error removing index dir ' +
+                    '(nothing to worry this will be replaced by lz4 extraction)');
+            }
         }
     }
 
