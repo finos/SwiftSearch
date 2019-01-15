@@ -131,7 +131,9 @@ export default class Search extends SearchUtils implements SearchInterface {
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
         if (isFileExist.call(this, 'LZ4') && !reIndex) {
             decompression(`${userIndexPath}${searchConfig.TAR_LZ4_EXT}`, (status: boolean) => {
-                if (!status && !isFileExist.call(this, 'USER_INDEX_PATH')) {
+                if (!status) {
+                    log.send(logLevels.INFO, 'decompression: failed re-creating index');
+                    clearSearchData.call(this);
                     log.send(logLevels.INFO, 'Creating new index');
                     fs.mkdirSync(userIndexPath);
                 }
