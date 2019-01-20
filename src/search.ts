@@ -100,7 +100,6 @@ export default class Search extends SearchUtils implements SearchInterface {
         libSymphonySearch.symSEInit();
         libSymphonySearch.symSEClearMainRAMIndex();
         libSymphonySearch.symSEClearRealtimeRAMIndex();
-        this.isInitialized = true;
         const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
         if (isFileExist.call(this, 'USER_INDEX_PATH')) {
@@ -110,6 +109,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 clearSearchData.call(this);
                 if (res === undefined || res === null || res < 0) {
                     log.send(logLevels.ERROR, 'Deserialization of Main Index Failed-> ' + error);
+                    this.isInitialized = true;
                     return;
                 }
                 log.send(logLevels.INFO, 'Deserialization of Main Index Successful-> ' + res);
@@ -117,6 +117,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 // Deleting all the messages except 3 Months from now
                 libSymphonySearch.symSEDeleteMessagesFromRAMIndex(null,
                     searchConfig.MINIMUM_DATE, indexDateStartFrom.toString());
+                this.isInitialized = true;
             });
         }
     }
