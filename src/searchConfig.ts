@@ -59,6 +59,7 @@ const searchConfig = {
     MINIMUM_DISK_SPACE: 300000000, // in bytes
     REAL_TIME_INDEXING_TIME: 60000,
     SEARCH_PERIOD_SUBTRACTOR: 3 * 31 * 24 * 60 * 60 * 1000,
+    SORT_BY_DATE: 1,
     SORT_BY_SCORE: 0,
     TAR_LZ4_EXT: '.tar.lz4',
 };
