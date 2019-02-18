@@ -318,7 +318,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 SORT_ORDER = searchConfig.SORT_BY_SCORE;
             }
 
-            const q = this.constructQuery(query, senderIds, threadIds, fileType, SORT_ORDER === 1);
+            const q = this.constructQuery(query, senderIds, threadIds, fileType, SORT_ORDER === searchConfig.SORT_BY_DATE);
 
             if (!q) {
                 resolve({
