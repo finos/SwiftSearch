@@ -101,7 +101,7 @@ export interface SearchInterface {
                 endDate: string, limit: number, offset: number, sortOrder: number): Promise<SearchResponse>;
     getLatestMessageTimestamp(callback: any): boolean | void | null;
     deleteRealTimeFolder(): void;
-    constructQuery(searchQuery: string, senderId: string[], threadId: string[], fileType: string): string;
+    constructQuery(searchQuery: string, senderId: string[], threadId: string[], fileType: string, sort: boolean): string;
 }
 
 /**

@@ -607,6 +607,75 @@ describe('Tests for Search', () => {
         });
     });
 
+    describe('Search Query filter recency', () => {
+        it('should return correct if sort is recency for q:testing', () => {
+            const test = SearchApi.constructQuery('testing', [], [], null, 1);
+            expect(test).toBe('((text:(testing)))');
+        });
+
+        it('should return correct if sort is recency for q:test all ok', () => {
+            const test = SearchApi.constructQuery('test all ok', [], [], null, 1);
+            expect(test).toBe('((text:(test all ok)))');
+        });
+
+        it('should return correct if sort is recency for q:test "all" ok', () => {
+            const test = SearchApi.constructQuery('test "all" ok', [], [], null, 1);
+            expect(test).toBe('((text:(test "all" ok)))');
+        });
+
+        it('should return correct if sort is recency for q:test "all" ok $123', () => {
+            const test = SearchApi.constructQuery('test "all" ok $123', [], [], null, 1);
+            expect(test).toBe('((text:(test "all" ok $123)) OR tags:("$123" ))');
+        });
+
+        it('should return correct if sort is recency for q:test "all" ok $123 #hash', () => {
+            const test = SearchApi.constructQuery('test "all" ok $123 #hash', [], [], null, 1);
+            expect(test).toBe('((text:(test "all" ok $123 #hash)) OR tags:("$123" "#hash" ))');
+        });
+
+        it('should return correct if sort is recency for q:test "all" ok $123 #hash', () => {
+            const test = SearchApi.constructQuery('test "all" ok $123 #hash', [], [], 'PDF', 1);
+            expect(test).toBe('((text:(test "all" ok $123 #hash)) OR tags:("$123" "#hash" ) OR (filename:(test "all" ok $123 #hash))) AND (filetype:(PDF))');
+        });
+    });
+
+    describe('Search Query filter relevance', () => {
+        it('should return correct if sort is relevance for q:testing', () => {
+            const test = SearchApi.constructQuery('testing', [], [], null, 0);
+            expect(test).toBe('((text:("testing")))');
+        });
+
+        it('should return correct if sort is relevance for q:test all ok', () => {
+            const test = SearchApi.constructQuery('test all ok', [], [], null, 0);
+            expect(test).toBe('((text:("test all ok" "test all" "all ok" "test" "all" "ok")))');
+        });
+
+        it('should return correct if sort is relevance for q:test "all" ok', () => {
+            const test = SearchApi.constructQuery('test "all" ok', [], [], null, 0);
+            expect(test).toBe('((text:(test "all" ok)))');
+        });
+
+        it('should return correct if sort is relevance for q:test "all" ok $123', () => {
+            const test = SearchApi.constructQuery('test "all" ok $123', [], [], null, 0);
+            expect(test).toBe('((text:(test "all" ok $123)) OR tags:("$123" ))');
+        });
+
+        it('should return correct if sort is relevance for q:test "all" ok $123 #hash', () => {
+            const test = SearchApi.constructQuery('test "all" ok $123 #hash', [], [], null, 0);
+            expect(test).toBe('((text:(test "all" ok $123 #hash)) OR tags:("$123" "#hash" ))');
+        });
+
+        it('should return correct if sort is relevance for q:test "all" ok $123 #hash', () => {
+            const test = SearchApi.constructQuery('test "all" ok $123 #hash', [], [], 'PDF', 0);
+            expect(test).toBe('((text:(test "all" ok $123 #hash)) OR tags:("$123" "#hash" ) OR (filename:(test "all" ok $123 #hash))) AND (filetype:(PDF))');
+        });
+
+        it('should return correct if sort is relevance for q:test all ok $123 #hash', () => {
+            const test = SearchApi.constructQuery('test all ok $123 #hash', [], [], 'PDF', 0);
+            expect(test).toBe('((text:("test all ok $123 #hash" "test all ok $123" "all ok $123 #hash" "test all ok" "all ok $123" "ok $123 #hash" "test all" "all ok" "ok $123" "$123 #hash" "test" "all" "ok" "$123" "#hash")) OR tags:("$123" "#hash" ) OR (filename:(test all ok $123 #hash))) AND (filetype:(PDF))');
+        });
+    });
+
     describe('Tests for checking disk space', () => {
 
         it('should return free space', (done) => {

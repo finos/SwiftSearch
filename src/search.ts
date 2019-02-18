@@ -314,7 +314,11 @@ export default class Search extends SearchUtils implements SearchInterface {
                 return;
             }
 
-            const q = this.constructQuery(query, senderIds, threadIds, fileType);
+            if (!SORT_ORDER || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
+                SORT_ORDER = searchConfig.SORT_BY_SCORE;
+            }
+
+            const q = this.constructQuery(query, senderIds, threadIds, fileType, SORT_ORDER === 1);
 
             if (!q) {
                 resolve({
@@ -349,10 +353,6 @@ export default class Search extends SearchUtils implements SearchInterface {
 
             if (!OFFSET || typeof OFFSET !== 'number' || Math.round(OFFSET) !== OFFSET) {
                 OFFSET = 0;
-            }
-
-            if (!SORT_ORDER || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
-                SORT_ORDER = searchConfig.SORT_BY_SCORE;
             }
 
             const returnedResult = libSymphonySearch.symSERAMIndexSearch(q, startDateTime.toString(), endDateTime.toString(), OFFSET, LIMIT, SORT_ORDER);
@@ -412,15 +412,16 @@ export default class Search extends SearchUtils implements SearchInterface {
      * @param {Array} senderId
      * @param {Array} threadId
      * @param {String} fileType
+     * @param {Boolean} sort
      * @returns {string}
      */
-    public constructQuery(searchQuery: string, senderId: string[], threadId: string[], fileType: string): string {
+    public constructQuery(searchQuery: string, senderId: string[], threadId: string[], fileType: string, sort: boolean): string {
 
         let searchText = '';
         let textQuery = '';
         if (searchQuery !== undefined) {
             searchText = searchQuery.trim().toLowerCase(); // to prevent injection of AND and ORs
-            textQuery = this.getTextQuery(searchText);
+            textQuery = this.getTextQuery(searchText, sort);
         }
         let q = '';
         const hashTags = this.getHashTags(searchText);
@@ -524,10 +525,10 @@ export default class Search extends SearchUtils implements SearchInterface {
      * If the search query does not have double quotes (implying phrase search),
      * then create all tuples of the terms in the search query
      * @param {String} searchText
+     * @param {Boolean} sort
      * @returns {String}
      */
-
-    private getTextQuery(searchText: string): string {
+    private getTextQuery(searchText: string, sort: boolean): string {
         const s1 = searchText.trim().toLowerCase();
         // if contains quotes we assume it will be a phrase search
         if (searchText.indexOf('"') !== -1 ) {
@@ -540,6 +541,9 @@ export default class Search extends SearchUtils implements SearchInterface {
         let i;
         let j = 0;
         let out = '';
+        if (sort) {
+            return tokens.join(' ');
+        }
         for (i = tokens.length; i > 0; i--) {// number of tokens in a tuple
             for (j = 0; j < tokens.length - i + 1 ; j++) { // start from index
                 if (out !== '') {
