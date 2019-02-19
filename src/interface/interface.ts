@@ -113,3 +113,8 @@ export interface SearchUtilsInterface {
     getSearchUserConfig(userId: string): Promise<UserConfig>;
     updateUserConfig(userId: string, data: UserConfig): Promise<UserConfig>;
 }
+
+export enum apiBridgeCmds {
+    initialSearch = 'init-search',
+    indexBatch = 'index-batch',
+}
