@@ -114,6 +114,9 @@ export interface SearchUtilsInterface {
 }
 
 export enum apiBridgeCmds {
-    initialSearch = 'init-search',
-    indexBatch = 'index-batch',
+    initialSearch = 'swift-search::init-search',
+    indexBatch = 'swift-search::index-batch',
+    indexBatchCallback = 'swift-search::index-batch-callback',
+    search = 'swift-search::search',
+    searchCallback = 'swift-search::search-callback',
 }
