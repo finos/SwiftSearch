@@ -112,6 +112,16 @@ export interface SearchUtilsInterface {
     getSearchUserConfig(userId: string): Promise<UserConfig>;
     updateUserConfig(userId: string, data: UserConfig): Promise<UserConfig>;
 }
+/**
+ * SSAPIBridgeInterface
+ */
+export interface SSAPIBridgeInterface {
+    handleMessageEvents(data: any, eventCallback: () => void): void;
+    indexBatch(data: any): void;
+    search(data: any): void;
+    indexBatchCallback(data: {status: boolean, message: string}): void;
+    searchCallback(data: any): void;
+}
 
 export enum apiBridgeCmds {
     initialSearch = 'swift-search::init-search',
