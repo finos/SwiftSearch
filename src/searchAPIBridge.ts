@@ -1,27 +1,44 @@
-import { apiBridgeCmds } from './interface/interface';
+import { apiBridgeCmds, SSAPIBridgeInterface } from './interface/interface';
 import { log } from './log/log';
 import { logLevels } from './log/logLevels';
 import Search from './search';
 
 let SwiftSearchAPI: any;
 
-export default class SSAPIBridge {
+export default class SSAPIBridge implements SSAPIBridgeInterface {
+    private static isLibInit(): boolean {
+        return SwiftSearchAPI && SwiftSearchAPI.isLibInit();
+    }
+
+    private static initSearch(data: any): void {
+        const { userId, key } = data;
+        SwiftSearchAPI = new Search(userId, key);
+    }
+
+    public indexBatchCallback = ((data: {status: boolean, message: string}) => {
+        this.eventCallback(apiBridgeCmds.indexBatchCallback, data);
+    });
+
+    public searchCallback = ((data: any): void => {
+        this.eventCallback(apiBridgeCmds.searchCallback, data);
+    });
+
     private eventCallback: any;
 
     constructor() {
         log.send(logLevels.INFO, 'Swift-Search Api Bridge Created');
     }
 
-    public handleMessageEvents = (data: any, eventCallback: () => void) => {
+    public handleMessageEvents(data: any, eventCallback: () => void): void {
         const { method, message } = data;
         this.eventCallback = eventCallback;
-        if (!this.isLibInit() && method !== apiBridgeCmds.initialSearch) {
+        if (!SSAPIBridge.isLibInit() && method !== apiBridgeCmds.initialSearch) {
             return;
         }
 
         switch (method) {
             case apiBridgeCmds.initialSearch:
-                this.initSearch(message);
+                SSAPIBridge.initSearch(message);
                 break;
             case apiBridgeCmds.indexBatch:
                 this.indexBatch(message);
@@ -34,21 +51,12 @@ export default class SSAPIBridge {
         }
     }
 
-    private initSearch = (data: any) => {
-        const { userId, key } = data;
-        SwiftSearchAPI = new Search(userId, key);
-    }
-
-    private isLibInit = () => {
-        return SwiftSearchAPI && SwiftSearchAPI.isLibInit();
-    }
-
-    private indexBatch = (data: any) => {
+    public indexBatch(data: any): void {
         const { messages } = data;
         SwiftSearchAPI.indexBatch(messages, this.indexBatchCallback);
     }
 
-    private search = (data: any) => {
+    public search(data: any): void {
         const { query,
             senderIds,
             threadIds,
@@ -57,7 +65,8 @@ export default class SSAPIBridge {
             endDat,
             limit,
             offset,
-            sortOrder} = data;
+            sortOrder } = data;
+
         SwiftSearchAPI.searchQuery(query,
             senderIds,
             threadIds,
@@ -69,13 +78,5 @@ export default class SSAPIBridge {
             sortOrder).then(() => {
                 this.searchCallback({});
         });
-    }
-
-    private indexBatchCallback = (data: {status: boolean, message: string}) => {
-        this.eventCallback(apiBridgeCmds.indexBatchCallback, data);
-    }
-
-    private searchCallback = (data: any) => {
-        this.eventCallback(apiBridgeCmds.searchCallback, data);
     }
 }
