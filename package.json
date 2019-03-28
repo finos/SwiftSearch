@@ -1,6 +1,6 @@
 {
   "name": "swift-search",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Swift Search is a Javascript binding for search library which is written in C (Apache Lucene)",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
