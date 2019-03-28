@@ -79,6 +79,12 @@
     </div>
     <br>
     <div>
+        <label for="batchIndexing">Batch Indexing:</label><input placeholder="messages:"
+                                                                        id="batchIndexing">
+        <button id='batchMessage'>Send</button>
+    </div>
+    <br>
+    <div>
         <label for="getLatestMessageTimestamp">Get Latest Message Timestamp</label>
         <button id='getLatestMessageTimestamp'>Click</button>
     </div>
@@ -130,7 +136,9 @@
     var var1El = document.getElementById('var1');
     var table = document.getElementById('table');
     var sendMessage = document.getElementById('sendMessage');
+    var batchMessage = document.getElementById('batchMessage');
     var realTimeIndexing = document.getElementById('realTimeIndexing');
+    var batchIndexing = document.getElementById('batchIndexing');
     var timestamp = document.getElementById('getLatestMessageTimestamp');
     var has = document.getElementById('has');
     var checkFreeSpace = document.getElementById('checkFreeSpace');
@@ -212,6 +220,20 @@
             let message = realTimeIndexing.value;
             search.batchRealTimeIndexing(JSON.parse(message));
             resultsEl.innerHTML = 'success';
+        } else {
+            resultsEl.innerHTML = "Please check the entered value"
+        }
+    });
+
+    batchMessage.addEventListener('click', function () {
+        if (batchIndexing.value !== "") {
+            let message = batchIndexing.value;
+            const callback = function(res) {
+                resultsEl.innerHTML = res;
+            };
+            const msg = JSON.parse(message);
+            msg[0].renderingBlob = JSON.stringify(msg[0].renderingBlob);
+            search.indexBatch(JSON.stringify(msg), callback);
         } else {
             resultsEl.innerHTML = "Please check the entered value"
         }
