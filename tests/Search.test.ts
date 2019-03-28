@@ -130,6 +130,7 @@ describe('Tests for Search', () => {
                 ingestionDate: currentDate.toString(),
                 isPublic: 'false',
                 messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                renderingBlob: '{"customEntities":[],"entityJSON":{},"presentationML":"<div data-format=\\"PresentationML\\" data-version=\\"2.0\\" class=\\"wysiwyg\\"><p>texgsd</p></div>","format":"com.symphony.messageml.v2"}',
                 senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'it works',
@@ -235,6 +236,7 @@ describe('Tests for Search', () => {
                 '', undefined, undefined, 25, 0,
                 0).then((res: SearchResponse) => {
                 expect(res.messages.length).toEqual(3);
+                expect(res.messages[1].renderingBlob).toEqual('{"customEntities":[],"entityJSON":{},"presentationML":"<div data-format=\\"PresentationML\\" data-version=\\"2.0\\" class=\\"wysiwyg\\"><p>texgsd</p></div>","format":"com.symphony.messageml.v2"}');
                 expect(searchQuery).toHaveBeenCalled();
                 done();
             });
@@ -243,21 +245,25 @@ describe('Tests for Search', () => {
 
     describe('RealTime indexing process', () => {
 
-        it('should index realTime message', () => {
-            const message = [{
+        it('should index realTime message', (done) => {
+            const message = {
                 chatType: 'CHATROOM',
                 ingestionDate: currentDate.toString(),
                 isPublic: 'false',
                 messageId: 'Jc+4K8RtPxHJfyuDQU9atX///qN3KHYXdA==',
+                renderingBlob: '{"customEntities":[],"entityJSON":{},"presentationML":"<div data-format=\\"PresentationML\\" data-version=\\"2.0\\" class=\\"wysiwyg\\"><p>texgsd</p></div>","format":"com.symphony.messageml.v2"}',
                 senderId: '71811853189212',
                 sendingApp: 'lc',
                 text: 'realtime working',
                 threadId: 'Au8O2xKHyX1LtE6zW019GX///rZYegAtdA==',
-            }];
+            };
 
             const batchRealTimeIndexing = jest.spyOn(SearchApi, 'batchRealTimeIndexing');
             SearchApi.batchRealTimeIndexing(message);
             expect(batchRealTimeIndexing).toHaveBeenCalled();
+            setTimeout(() => {
+                done();
+            }, 1000);
         });
 
         it('should match message length', (done) => {
@@ -266,7 +272,9 @@ describe('Tests for Search', () => {
                 ['Au8O2xKHyX1LtE6zW019GX///rZYegAtdA=='],
                 '', undefined, undefined,
                 25, 0, 0).then((res: SearchResponse) => {
-                expect(res.messages.length).toEqual(3);
+                expect(res.messages.length).toEqual(4);
+                const msg = res.messages;
+                expect(msg[0].renderingBlob).toEqual('{"customEntities":[],"entityJSON":{},"presentationML":"<div data-format=\\"PresentationML\\" data-version=\\"2.0\\" class=\\"wysiwyg\\"><p>texgsd</p></div>","format":"com.symphony.messageml.v2"}');
                 expect(searchQuery).toHaveBeenCalled();
                 done();
             });
@@ -755,7 +763,7 @@ describe('Tests for Search', () => {
                 version: 1,
             };
             SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res: UserConfig) => {
-                expect(res.indexVersion).toEqual('v2');
+                expect(res.indexVersion).toEqual('v3');
                 done();
             });
         });
@@ -768,7 +776,7 @@ describe('Tests for Search', () => {
             };
             SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res: UserConfig) => {
                 expect(res.rotationId).toEqual(1);
-                expect(res.indexVersion).toEqual('v2');
+                expect(res.indexVersion).toEqual('v3');
                 done();
             });
         });

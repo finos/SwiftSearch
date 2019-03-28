@@ -57,6 +57,7 @@ interface Entities {
  * Messages
  */
 export interface Message {
+    renderingBlob: string;
     messageId: string;
     text: string;
     senderId: string;

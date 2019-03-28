@@ -49,7 +49,7 @@ const searchConfig = {
     DISK_NOT_FOUND: 'DISK_NOT_FOUND',
     DISK_NOT_READY: 'NOT_READY',
     FOLDERS_CONSTANTS: folderPaths,
-    INDEX_VERSION: 'v2',
+    INDEX_VERSION: 'v3',
     KEY_ENCODING: 'base64',
     KEY_LENGTH: 32,
     LIBRARY_CONSTANTS: libraryPaths,
