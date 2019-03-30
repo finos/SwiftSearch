@@ -130,4 +130,7 @@ export enum apiBridgeCmds {
     indexBatchCallback = 'swift-search::index-batch-callback',
     search = 'swift-search::search',
     searchCallback = 'swift-search::search-callback',
+
+    checkDiskSpace = 'swift-search::check-disk-space',
+    checkDiskSpaceCallBack = 'swift-search::check-disk-space-callback',
 }

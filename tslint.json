@@ -28,7 +28,7 @@
     "no-use-before-declare": true,
     "no-var-requires": true,
     "no-console": [
-      true,
+      false,
       "log",
       "error"
     ],

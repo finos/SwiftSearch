@@ -2,8 +2,16 @@ import { apiBridgeCmds, SSAPIBridgeInterface } from './interface/interface';
 import { log } from './log/log';
 import { logLevels } from './log/logLevels';
 import Search from './search';
+import SearchUtils from './utils/searchUtils';
 
 let SwiftSearchAPI: any;
+
+const makePayload = (requestId: number, data: any) => {
+    return {
+        requestId,
+        ...data,
+    };
+};
 
 export default class SSAPIBridge implements SSAPIBridgeInterface {
     private static isLibInit(): boolean {
@@ -24,9 +32,11 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
     });
 
     private eventCallback: any;
+    private SearchUtils: SearchUtils;
 
     constructor() {
         log.send(logLevels.INFO, 'Swift-Search Api Bridge Created');
+        this.SearchUtils = new SearchUtils();
     }
 
     public handleMessageEvents(data: any, eventCallback: () => void): void {
@@ -35,6 +45,9 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
         if (!SSAPIBridge.isLibInit() && method !== apiBridgeCmds.initialSearch) {
             return;
         }
+
+        log.send(logLevels.INFO, message);
+        log.send(logLevels.INFO, method);
 
         switch (method) {
             case apiBridgeCmds.initialSearch:
@@ -46,9 +59,22 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
             case apiBridgeCmds.search:
                 this.search(message);
                 break;
+            case apiBridgeCmds.checkDiskSpace:
+                this.checkDiskSpace(message);
+                break;
             default:
                 break;
         }
+    }
+
+    public checkDiskSpace(message: any) {
+        const { requestId } = message;
+        this.SearchUtils.checkFreeSpace().then((res: boolean) => {
+            log.send(logLevels.INFO, this.eventCallback);
+            log.send(logLevels.INFO, res);
+            log.send(logLevels.INFO, makePayload(requestId, res));
+            this.eventCallback(apiBridgeCmds.checkDiskSpaceCallBack, makePayload(requestId, res));
+        });
     }
 
     public indexBatch(data: any): void {
