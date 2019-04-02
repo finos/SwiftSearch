@@ -122,15 +122,42 @@ export interface SSAPIBridgeInterface {
     search(data: any): void;
     indexBatchCallback(data: {status: boolean, message: string}): void;
     searchCallback(data: any): void;
+    setBroadcastMessage(eventCallback: () => void): void;
+}
+
+export interface PostSuccessCallback {
+    method: string;
+    response: any;
+}
+
+export interface PostErrorCallback {
+    method: string;
+    error: any;
+}
+
+export interface PostDataFromSFE {
+    requestId: number;
+    message?: any;
 }
 
 export enum apiBridgeCmds {
+    // Main Events
+    swiftSearch = 'swift-search',
     initialSearch = 'swift-search::init-search',
     indexBatch = 'swift-search::index-batch',
-    indexBatchCallback = 'swift-search::index-batch-callback',
     search = 'swift-search::search',
-    searchCallback = 'swift-search::search-callback',
+    getLatestTimestamp = 'swift-search::get-latest-timestamp',
 
+    // Search Utils
     checkDiskSpace = 'swift-search::check-disk-space',
+    getSearchUserConfig = 'swift-search::get-search-user-config',
+    updateUserConfig = 'swift-search::update-user-config',
+
+    // Callbacks
+    indexBatchCallback = 'swift-search::index-batch-callback',
+    searchCallback = 'swift-search::search-callback',
     checkDiskSpaceCallBack = 'swift-search::check-disk-space-callback',
+    getSearchUserConfigCallback = 'swift-search::get-search-user-config-callback',
+    updateUserConfigCallback = 'swift-search::update-user-config-callback',
+    getLatestTimestampCallback = 'swift-search::get-latest-timestamp-callback',
 }
