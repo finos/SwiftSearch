@@ -34,21 +34,22 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
         SwiftSearchAPI = new Search(userId, key);
     }
 
-    public indexBatchCallback = ((data: {status: boolean, message: string}) => {
-        this.eventCallback(apiBridgeCmds.swiftSearch, { method: apiBridgeCmds.getSearchUserConfigCallback, data});
-    });
-
-    public getLatestTimestampCallback = ((status: boolean, message: string) => {
+    public indexBatchCallback = ((requestId: number, status: boolean, data: string) => {
         this.eventCallback(
             apiBridgeCmds.swiftSearch,
-            {
-                method: apiBridgeCmds.getSearchUserConfigCallback,
-                response: { status, message },
-            });
+            makePayload(requestId, { method: apiBridgeCmds.indexBatchCallback, response: { status, data }}));
     });
 
-    public searchCallback = ((data: any): void => {
-        this.eventCallback(apiBridgeCmds.searchCallback, data);
+    public getLatestTimestampCallback = ((requestId: number, status: boolean, timestamp: string) => {
+        this.eventCallback(
+            apiBridgeCmds.swiftSearch,
+            makePayload(requestId, { method: apiBridgeCmds.getLatestTimestampCallback, response: { status, timestamp }}));
+    });
+
+    public searchCallback = ((requestId: number, data: any): void => {
+        this.eventCallback(
+            apiBridgeCmds.swiftSearch,
+            makePayload(requestId, { method: apiBridgeCmds.searchCallback, response:  data }));
     });
 
     private eventCallback: any;
@@ -75,19 +76,28 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
                 SSAPIBridge.initSearch(message);
                 break;
             case apiBridgeCmds.getLatestTimestamp:
-                this.getLatestTimestamp(message);
+                this.getLatestTimestamp(data);
                 break;
             case apiBridgeCmds.indexBatch:
-                this.indexBatch(message);
+                this.indexBatch(data);
                 break;
             case apiBridgeCmds.search:
-                this.search(message);
+                this.searchQuery(data);
                 break;
             case apiBridgeCmds.checkDiskSpace:
                 this.checkDiskSpace(data);
                 break;
             case apiBridgeCmds.getSearchUserConfig:
                 this.getSearchUserConfig(data);
+                break;
+            case apiBridgeCmds.encryptIndex:
+                this.encryptIndex(data);
+                break;
+            case apiBridgeCmds.realTimeIndex:
+                this.realTimeIndex(data);
+                break;
+            case apiBridgeCmds.deleteRealTimeIndex:
+                this.deleteRealTimeFolder();
                 break;
             default:
                 break;
@@ -134,36 +144,61 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
     }
 
     public indexBatch(data: PostDataFromSFE): void {
+        const { message, requestId } = data;
+        SwiftSearchAPI.indexBatch(message, this.indexBatchCallback.bind(this, requestId));
+    }
+
+    public realTimeIndex(data: PostDataFromSFE): void {
         const { message } = data;
-        SwiftSearchAPI.indexBatch(message, this.indexBatchCallback);
+        SwiftSearchAPI.batchRealTimeIndexing(message);
     }
 
     public getLatestTimestamp(data: PostDataFromSFE): void {
-        const { message } = data;
-        SwiftSearchAPI.getLatestMessageTimestamp(this.getLatestTimestampCallback);
+        const { requestId } = data;
+        SwiftSearchAPI.getLatestMessageTimestamp(this.getLatestTimestampCallback.bind(this, requestId));
     }
 
-    public search(data: any): void {
-        const { query,
-            senderIds,
-            threadIds,
-            fileType,
-            startDat,
-            endDat,
-            limit,
-            offset,
-            sortOrder } = data;
+    public deleteRealTimeFolder(): void {
+        SwiftSearchAPI.deleteRealTimeFolder();
+    }
 
-        SwiftSearchAPI.searchQuery(query,
-            senderIds,
-            threadIds,
-            fileType,
-            startDat,
-            endDat,
+    public encryptIndex(data: PostDataFromSFE): void {
+        const { requestId, message } = data;
+        SwiftSearchAPI.encryptIndex(message)
+            .then(() => {
+                this.eventCallback(apiBridgeCmds.swiftSearch,
+                    makePayload(requestId, { method: apiBridgeCmds.encryptIndexCallback, response: true}));
+            })
+            .catch((e: any) => {
+                this.eventCallback(apiBridgeCmds.swiftSearch,
+                    makePayload(requestId, { method: apiBridgeCmds.encryptIndexCallback, error: e}));
+            });
+    }
+
+    public searchQuery(data: PostDataFromSFE): void {
+        const { requestId, message } = data;
+        const { q,
+            senderId,
+            threadId,
+            has,
+            startDate,
+            endDate,
             limit,
-            offset,
-            sortOrder).then(() => {
-                this.searchCallback({});
+            startingrow,
+            sortBy,
+        } = message;
+
+        SwiftSearchAPI.searchQuery(q,
+            senderId,
+            threadId,
+            has,
+            startDate,
+            endDate,
+            limit,
+            startingrow,
+            sortBy,
+        ).then((res: any) => {
+            this.searchCallback(requestId, res);
         });
     }
 }
