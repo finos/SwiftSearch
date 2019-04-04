@@ -93,6 +93,9 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
             case apiBridgeCmds.encryptIndex:
                 this.encryptIndex(data);
                 break;
+            case apiBridgeCmds.updateUserConfig:
+                this.updateUserConfig(data);
+                break;
             case apiBridgeCmds.realTimeIndex:
                 this.realTimeIndex(data);
                 break;
