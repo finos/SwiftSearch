@@ -116,17 +116,59 @@ export interface SearchUtilsInterface {
  * SSAPIBridgeInterface
  */
 export interface SSAPIBridgeInterface {
-    handleMessageEvents(data: any, eventCallback: () => void): void;
-    indexBatch(data: any): void;
-    search(data: any): void;
-    indexBatchCallback(data: {status: boolean, message: string}): void;
-    searchCallback(data: any): void;
+    handleMessageEvents(data: PostDataFromSFE): void;
+    indexBatch(data: PostDataFromSFE): void;
+    realTimeIndex(data: PostDataFromSFE): void;
+    searchQuery(data: PostDataFromSFE): void;
+    indexBatchCallback(requestId: number, status: boolean, data: string): void;
+    getLatestTimestampCallback(requestId: number, status: boolean, timestamp: string): void;
+    searchCallback(requestId: number, data: any): void;
+    setBroadcastMessage(eventCallback: () => void): void;
+    checkDiskSpace(data: PostDataFromSFE): void;
+    getSearchUserConfig(data: PostDataFromSFE): void;
+    updateUserConfig(data: PostDataFromSFE): void;
+    getLatestTimestamp(data: PostDataFromSFE): void;
+    encryptIndex(data: PostDataFromSFE): void;
+    deleteRealTimeFolder(): void;
+}
+
+export interface PostSuccessCallback {
+    method: string;
+    response: any;
+}
+
+export interface PostErrorCallback {
+    method: string;
+    error: any;
+}
+
+export interface PostDataFromSFE {
+    requestId: number;
+    message?: any;
 }
 
 export enum apiBridgeCmds {
+    // Main Events
+    swiftSearch = 'swift-search',
     initialSearch = 'swift-search::init-search',
     indexBatch = 'swift-search::index-batch',
-    indexBatchCallback = 'swift-search::index-batch-callback',
     search = 'swift-search::search',
+    getLatestTimestamp = 'swift-search::get-latest-timestamp',
+    encryptIndex = 'swift-search::encrypt-index',
+    realTimeIndex = 'swift-search::real-time-index',
+    deleteRealTimeIndex = 'swift-search::delete-real-time-index',
+
+    // Search Utils
+    checkDiskSpace = 'swift-search::check-disk-space',
+    getSearchUserConfig = 'swift-search::get-search-user-config',
+    updateUserConfig = 'swift-search::update-user-config',
+
+    // Callbacks
+    indexBatchCallback = 'swift-search::index-batch-callback',
     searchCallback = 'swift-search::search-callback',
+    checkDiskSpaceCallBack = 'swift-search::check-disk-space-callback',
+    getSearchUserConfigCallback = 'swift-search::get-search-user-config-callback',
+    updateUserConfigCallback = 'swift-search::update-user-config-callback',
+    getLatestTimestampCallback = 'swift-search::get-latest-timestamp-callback',
+    encryptIndexCallback = 'swift-search::encrypt-index-callback',
 }
