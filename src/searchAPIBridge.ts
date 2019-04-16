@@ -26,7 +26,7 @@ const WHITELIST = [
 
 export default class SSAPIBridge implements SSAPIBridgeInterface {
     private static isLibInit(): boolean {
-        return true; // SwiftSearchAPI && SwiftSearchAPI.isLibInit();
+        return SwiftSearchAPI && SwiftSearchAPI.isLibInit();
     }
 
     private static initSearch(data: any): void {
