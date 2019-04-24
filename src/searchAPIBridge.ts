@@ -1,4 +1,5 @@
-import { apiBridgeCmds,
+import {
+    apiBridgeCmds,
     PostDataFromSFE,
     PostErrorCallback,
     PostSuccessCallback,
@@ -11,18 +12,20 @@ import SearchUtils from './utils/searchUtils';
 
 let SwiftSearchAPI: any;
 
-const makePayload = (requestId: number, data: PostSuccessCallback | PostErrorCallback) => {
-    return {
-        requestId,
-        ...data,
-    };
+const makePayload = (data: PostSuccessCallback | PostErrorCallback) => {
+    return { ...data };
 };
 
 const WHITELIST = [
     apiBridgeCmds.initialSearch,
     apiBridgeCmds.checkDiskSpace,
-    apiBridgeCmds.checkDiskSpaceCallBack,
-];
+    apiBridgeCmds.getSearchUserConfig,
+    apiBridgeCmds.updateUserConfig,
+    apiBridgeCmds.search,
+].reduce((acc, curr) => {
+    acc[ curr ] = true;
+    return acc;
+}, {});
 
 export default class SSAPIBridge implements SSAPIBridgeInterface {
     private static isLibInit(): boolean {
@@ -30,6 +33,7 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
     }
 
     private static initSearch(data: any): void {
+        log.send(logLevels.INFO, 'Swift-Search Api Bridge Created');
         const { userId, key } = data;
         SwiftSearchAPI = new Search(userId, key);
     }
@@ -37,27 +41,30 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
     public indexBatchCallback = ((requestId: number, status: boolean, data: string) => {
         this.eventCallback(
             apiBridgeCmds.swiftSearch,
-            makePayload(requestId, { method: apiBridgeCmds.indexBatchCallback, response: { status, data }}));
+            makePayload({ requestId, method: apiBridgeCmds.indexBatchCallback, response: { status, data }}),
+        );
     });
 
     public getLatestTimestampCallback = ((requestId: number, status: boolean, timestamp: string) => {
         this.eventCallback(
             apiBridgeCmds.swiftSearch,
-            makePayload(requestId, { method: apiBridgeCmds.getLatestTimestampCallback, response: { status, timestamp }}));
+            makePayload({ requestId, method: apiBridgeCmds.getLatestTimestampCallback, response: { status, timestamp }}),
+        );
     });
 
     public searchCallback = ((requestId: number, data: any): void => {
         this.eventCallback(
             apiBridgeCmds.swiftSearch,
-            makePayload(requestId, { method: apiBridgeCmds.searchCallback, response:  data }));
+            makePayload({ requestId, method: apiBridgeCmds.searchCallback, response:  data }),
+        );
     });
 
-    private eventCallback: any;
     private SearchUtils: SearchUtils;
+    private eventCallback: any;
 
     constructor() {
-        log.send(logLevels.INFO, 'Swift-Search Api Bridge Created');
         this.SearchUtils = new SearchUtils();
+        this.handleMessageEvents = this.handleMessageEvents.bind(this);
     }
 
     public setBroadcastMessage(eventCallback: () => void): void {
@@ -111,12 +118,16 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
         const { requestId } = data;
         this.SearchUtils.checkFreeSpace()
             .then((res: boolean) => {
-                this.eventCallback(apiBridgeCmds.swiftSearch,
-                    makePayload(requestId, { method: apiBridgeCmds.checkDiskSpaceCallBack, response: res}));
+                this.eventCallback(
+                    apiBridgeCmds.swiftSearch,
+                    makePayload({ requestId, method: apiBridgeCmds.checkDiskSpaceCallBack, response: res}),
+                );
             })
             .catch((err) => {
-                this.eventCallback(apiBridgeCmds.swiftSearch,
-                    makePayload(requestId, { method: apiBridgeCmds.checkDiskSpaceCallBack, error: err}));
+                this.eventCallback(
+                    apiBridgeCmds.swiftSearch,
+                    makePayload({ requestId, method: apiBridgeCmds.checkDiskSpaceCallBack, error: err}),
+                );
             });
     }
 
@@ -124,12 +135,16 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
         const { requestId, message } = data;
         this.SearchUtils.getSearchUserConfig(message.userId)
             .then((res: any) => {
-                this.eventCallback(apiBridgeCmds.swiftSearch,
-                    makePayload(requestId, { method: apiBridgeCmds.getSearchUserConfigCallback, response: res}));
+                this.eventCallback(
+                    apiBridgeCmds.swiftSearch,
+                    makePayload({ requestId, method: apiBridgeCmds.getSearchUserConfigCallback, response: res}),
+                );
             })
             .catch((err) => {
-                this.eventCallback(apiBridgeCmds.swiftSearch,
-                    makePayload(requestId, { method: apiBridgeCmds.getSearchUserConfigCallback, error: err}));
+                this.eventCallback(
+                    apiBridgeCmds.swiftSearch,
+                    makePayload({ requestId, method: apiBridgeCmds.getSearchUserConfigCallback, error: err}),
+                );
             });
     }
 
@@ -137,12 +152,16 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
         const { requestId, message } = data;
         this.SearchUtils.updateUserConfig(message.userId, message.userData)
             .then((res: any) => {
-                this.eventCallback(apiBridgeCmds.swiftSearch,
-                    makePayload(requestId, { method: apiBridgeCmds.updateUserConfigCallback, response: res}));
+                this.eventCallback(
+                    apiBridgeCmds.swiftSearch,
+                    makePayload({ requestId, method: apiBridgeCmds.updateUserConfigCallback, response: res}),
+                );
             })
             .catch((err) => {
-                this.eventCallback(apiBridgeCmds.swiftSearch,
-                    makePayload(requestId, { method: apiBridgeCmds.updateUserConfigCallback, error: err}));
+                this.eventCallback(
+                    apiBridgeCmds.swiftSearch,
+                    makePayload({ requestId, method: apiBridgeCmds.updateUserConfigCallback, error: err}),
+                );
             });
     }
 
@@ -169,12 +188,16 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
         const { requestId, message } = data;
         SwiftSearchAPI.encryptIndex(message)
             .then(() => {
-                this.eventCallback(apiBridgeCmds.swiftSearch,
-                    makePayload(requestId, { method: apiBridgeCmds.encryptIndexCallback, response: true}));
+                this.eventCallback(
+                    apiBridgeCmds.swiftSearch,
+                    makePayload({ requestId, method: apiBridgeCmds.encryptIndexCallback, response: true}),
+                );
             })
             .catch((e: any) => {
-                this.eventCallback(apiBridgeCmds.swiftSearch,
-                    makePayload(requestId, { method: apiBridgeCmds.encryptIndexCallback, error: e}));
+                this.eventCallback(
+                    apiBridgeCmds.swiftSearch,
+                    makePayload({ requestId, method: apiBridgeCmds.encryptIndexCallback, error: e}),
+                );
             });
     }
 
@@ -190,7 +213,6 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
             startingrow,
             sortBy,
         } = message;
-
         SwiftSearchAPI.searchQuery(q,
             senderId,
             threadId,
