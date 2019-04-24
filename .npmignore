@@ -5,5 +5,5 @@ library
 app.log
 lib/demo
 demo
-src
+/src
 tests
