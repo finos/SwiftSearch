@@ -116,14 +116,13 @@ export interface SearchUtilsInterface {
  * SSAPIBridgeInterface
  */
 export interface SSAPIBridgeInterface {
-    handleMessageEvents(data: PostDataFromSFE): void;
+    handleMessageEvents(data: any): void;
     indexBatch(data: PostDataFromSFE): void;
     realTimeIndex(data: PostDataFromSFE): void;
     searchQuery(data: PostDataFromSFE): void;
     indexBatchCallback(requestId: number, status: boolean, data: string): void;
     getLatestTimestampCallback(requestId: number, status: boolean, timestamp: string): void;
     searchCallback(requestId: number, data: any): void;
-    setBroadcastMessage(eventCallback: () => void): void;
     checkDiskSpace(data: PostDataFromSFE): void;
     getSearchUserConfig(data: PostDataFromSFE): void;
     updateUserConfig(data: PostDataFromSFE): void;
@@ -134,11 +133,13 @@ export interface SSAPIBridgeInterface {
 
 export interface PostSuccessCallback {
     method: string;
+    requestId: number;
     response: any;
 }
 
 export interface PostErrorCallback {
     method: string;
+    requestId: number;
     error: any;
 }
 
