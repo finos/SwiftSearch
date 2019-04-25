@@ -130,6 +130,7 @@ export default class Search extends SearchUtils implements SearchInterface {
     public decompress(key: string, reIndex: boolean): void {
         const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
+        clearSearchData.call(this);
         if (isFileExist.call(this, 'LZ4') && !reIndex) {
             decompression(`${userIndexPath}${searchConfig.TAR_LZ4_EXT}`, (status: boolean) => {
                 if (!status) {
