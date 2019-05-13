@@ -38,7 +38,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
     const spyConsoleInfo = jest.spyOn( console, 'info' );
 
     const UserID: number = 89876543212345;
-    const Key: string = 'jjjehdnctJohnlskcjdhsnahsadndfnusdfsdfsd=';
+    const Key: string = 'jjjehdnctkeerthilskcjdhsnahsadndfnusdfsdfsd=';
 
     const pathToLZ4 = path.join(mockedGetPath('userData'), `search_index_${UserID}.tar.lz4`);
     const configFile = path.join(userConfigDir, 'search_users_config.json');
