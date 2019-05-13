@@ -38,7 +38,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
     const spyConsoleInfo = jest.spyOn( console, 'info' );
 
     const UserID: number = 89876543212345;
-    const Key: string = 'jjjehdnctkeerthilskcjdhsnahsadndfnusdfsdfsd=';
+    const Key: string = 'jjjehdnctJohnlskcjdhsnahsadndfnusdfsdfsd=';
 
     const pathToLZ4 = path.join(mockedGetPath('userData'), `search_index_${UserID}.tar.lz4`);
     const configFile = path.join(userConfigDir, 'search_users_config.json');
@@ -68,7 +68,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         if (fs.existsSync(pathToLZ4)) fs.unlinkSync(pathToLZ4);
     });
 
-    it('should should not initialSearch if key is missing', (done) => {
+    it('should should not initialize search if key is missing', (done) => {
         const message = generatePostData(apiBridgeCmds.initialSearch,
             {
                 message: {
@@ -127,11 +127,11 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         done();
     });
 
-    it('should not real time index before search is initialized', (done) => {
+    it('should not do real time indexing before search is initialized', (done) => {
         const realTimeIndex = jest.spyOn(searchBridge, 'realTimeIndex');
         const message1 = generatePostData(apiBridgeCmds.realTimeIndex,
             {
-                message: JSON.parse(getMessage('keerthi'))[0],
+                message: JSON.parse(getMessage('John'))[0],
                 requestId: 1,
             },
         );
@@ -159,7 +159,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         done();
     });
 
-    it('should should initialSearch', (done) => {
+    it('should initialize search', (done) => {
         const message = generatePostData(apiBridgeCmds.initialSearch,
             {
                 message: {
@@ -189,7 +189,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         searchBridge.handleMessageEvents(message1);
     });
 
-    it('should return empty results for search after initialization in completed', (done) => {
+    it('should return empty results for search after initialization is completed', (done) => {
         const message1 = generatePostData(apiBridgeCmds.search,
             {
                 message: {
@@ -284,10 +284,10 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         searchBridge.handleMessageEvents(message1);
     });
 
-    it('should real time index message', (done) => {
+    it('should do real time indexing of the message', (done) => {
         const message1 = generatePostData(apiBridgeCmds.realTimeIndex,
             {
-                message: JSON.parse(getMessage('keerthi'))[0],
+                message: JSON.parse(getMessage('John'))[0],
             },
         );
 
@@ -303,14 +303,14 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         const message1 = generatePostData(apiBridgeCmds.search,
             {
                 message: {
-                    q: 'keerthi',
+                    q: 'John',
                 },
                 requestId: 1,
             },
         );
         searchBridge.setBroadcastMessage(getCallback.bind(null, generateResponseData(apiBridgeCmds.searchCallback, {
             requestId: 1,
-            response: {messages: JSON.parse(getMessage('keerthi')), more: 0, returned: 1, total: 1},
+            response: {messages: JSON.parse(getMessage('John')), more: 0, returned: 1, total: 1},
         }), done));
         searchBridge.handleMessageEvents(message1);
     });
@@ -322,7 +322,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         const message2 = generatePostData(apiBridgeCmds.search,
             {
                 message: {
-                    q: 'keerthi',
+                    q: 'John',
                 },
                 requestId: 1,
             },
@@ -510,7 +510,7 @@ function getMessage(text: string, senderId: string = '71811853189821', threadId:
         messageId: 'SYyDPxSxABUpOIGyXNnx8H///p53Gb0obQ==',
         senderAvatar: '../avatars/sym-corp-stage-chat-glb-1/150/71811853189821/BNItmUO7OeaUhh7MxIzGqgHVvOh9Iame0WHBHhAcA_w.png',
         senderId,
-        senderName: 'Keerthi Niranjan',
+        senderName: 'John',
         senderType: 'lc',
         sendingApp: 'lc',
         text,
