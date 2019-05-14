@@ -230,6 +230,7 @@
             let message = batchIndexing.value;
             const callback = function(res) {
                 resultsEl.innerHTML = res;
+                search.encryptIndex("jjjehdnctsjyieoalskcjdhsnahsadndfnusdfsdfsd=");
             };
             const msg = JSON.parse(message);
             msg[0].renderingBlob = JSON.stringify(msg[0].renderingBlob);
