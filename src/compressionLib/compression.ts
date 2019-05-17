@@ -7,7 +7,7 @@ import { searchConfig } from '../searchConfig';
 import { isDevEnv, isMac} from '../utils/misc';
 
 const exec = util.promisify(childProcess.exec);
-const ROOT_PATH = isDevEnv ? path.join(__dirname, '..', '..') : searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH;
+const ROOT_PATH: string = isDevEnv ? path.join(__dirname, '..', '..') : searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH;
 
 /**
  * Using the child process to execute the tar and lz4
@@ -32,7 +32,8 @@ async function compression(pathToFolder: string, outputPath: string, callback: (
         }
     } else {
         try {
-            const { stdout, stderr } = await exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" cf - "${pathToFolder}" | "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" > "${outputPath}.tar.lz4"`);
+            const drive = ROOT_PATH.substring(0, 2);
+            const { stdout, stderr } = await exec(`${drive} && cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" cf - "${pathToFolder}" | "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" > "${outputPath}.tar.lz4"`);
             if (stderr) {
                 log.send(logLevels.INFO, `compression stderr: ${stderr}`);
             }
@@ -67,7 +68,8 @@ async function decompression(pathName: string, callback: (status: boolean) => vo
         }
     } else {
         try {
-            const { stdout, stderr } = await exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" -d "${pathName}" | "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" xf - `);
+            const drive = ROOT_PATH.substring(0, 2);
+            const { stdout, stderr } = await exec(`${drive} && cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" -d "${pathName}" | "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" xf - `);
             if (stderr) {
                 log.send(logLevels.INFO, `decompression stderr: ${stderr}`);
             }
