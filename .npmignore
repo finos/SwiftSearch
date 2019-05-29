@@ -4,3 +4,6 @@ library
 .github
 app.log
 lib/demo
+demo
+/src
+tests
