@@ -203,26 +203,7 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
 
     public searchQuery(data: PostDataFromSFE): void {
         const { requestId, message } = data;
-        const { q,
-            senderId,
-            threadId,
-            has,
-            startDate,
-            endDate,
-            limit,
-            startingrow,
-            sortBy,
-        } = message;
-        SwiftSearchAPI.searchQuery(q,
-            senderId,
-            threadId,
-            has,
-            startDate,
-            endDate,
-            limit,
-            startingrow,
-            sortBy,
-        ).then((res: any) => {
+        SwiftSearchAPI.searchQueryV2(message).then((res: any) => {
             this.searchCallback(requestId, res);
         });
     }
