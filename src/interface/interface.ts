@@ -86,6 +86,18 @@ export interface SearchResponse {
 }
 
 /**
+ * Search Payload
+ */
+export interface SearchPayload {
+    q: string;
+    limit: number;
+    offset: number;
+    sortOrder: number;
+    startDate: string;
+    endDate: string;
+}
+
+/**
  * SearchInterface
  */
 export interface SearchInterface {
@@ -99,7 +111,8 @@ export interface SearchInterface {
     realTimeIndexing(messages: string, callback: (status: boolean, message: string) => void): void | boolean | null;
     encryptIndex(key: string): Promise<void>;
     searchQuery(query: string, senderIds: string[], threadIds: string[], fileType: string, startDate: string,
-                endDate: string, limit: number, offset: number, sortOrder: number): Promise<SearchResponse>;
+                endDate: string, limit: number, offset: number, sortOrder: number, isQueryConstructed: boolean): Promise<SearchResponse>;
+    searchQueryV2(payload: SearchPayload): Promise<SearchResponse>;
     getLatestMessageTimestamp(callback: any): boolean | void | null;
     deleteRealTimeFolder(): void;
     constructQuery(searchQuery: string, senderId: string[], threadId: string[], fileType: string, sort: boolean): string;

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as ref from 'ref-napi';
 import { compression, decompression } from './compressionLib/compression';
-import { Message, SearchInterface, SearchResponse, UserConfig } from './interface/interface';
+import { Message, SearchInterface, SearchPayload, SearchResponse, UserConfig } from './interface/interface';
 import { log } from './log/log';
 import { logLevels } from './log/logLevels';
 import { searchConfig } from './searchConfig';
@@ -296,6 +296,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * @param {Number} offset
      * @param {Number} sortOrder
      * @returns {Promise}
+     * @deprecated Use searchQueryV2 instead
      */
     public searchQuery(query: string, senderIds: string[], threadIds: string[], fileType: string, startDate: string,
                        endDate: string, limit: number, offset: number, sortOrder: number): Promise<SearchResponse> {
@@ -317,10 +318,92 @@ export default class Search extends SearchUtils implements SearchInterface {
             }
 
             if (!SORT_ORDER || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
-                SORT_ORDER = searchConfig.SORT_BY_SCORE;
+                SORT_ORDER = searchConfig.SORT_BY_DATE;
             }
 
             const q = this.constructQuery(query, senderIds, threadIds, fileType, SORT_ORDER === searchConfig.SORT_BY_DATE);
+
+            if (!q) {
+                resolve({
+                    messages: [],
+                    more: 0,
+                    returned: 0,
+                    total: 0,
+                });
+                return;
+            }
+
+            const searchPeriod = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
+            let startDateTime = searchPeriod;
+            if (startDate) {
+                startDateTime = new Date(parseInt(startDate, 10)).getTime();
+                if (!startDateTime || startDateTime < searchPeriod) {
+                    startDateTime = searchPeriod;
+                }
+            }
+
+            let endDateTime: any = searchConfig.MAXIMUM_DATE;
+            if (endDate) {
+                const eTime = new Date(parseInt(endDate, 10)).getTime();
+                if (eTime) {
+                    endDateTime = eTime;
+                }
+            }
+
+            if (!LIMIT || typeof LIMIT !== 'number' || Math.round(LIMIT) !== LIMIT) {
+                LIMIT = 25;
+            }
+
+            if (!OFFSET || typeof OFFSET !== 'number' || Math.round(OFFSET) !== OFFSET) {
+                OFFSET = 0;
+            }
+
+            const returnedResult = libSymphonySearch.symSERAMIndexSearch(q, startDateTime.toString(), endDateTime.toString(), OFFSET, LIMIT, SORT_ORDER);
+            try {
+                const ret = ref.readCString(returnedResult);
+                resolve(JSON.parse(ret));
+            } finally {
+                libSymphonySearch.symSEFreeResult(returnedResult);
+            }
+        });
+    }
+
+    /**
+     * This returns the search results
+     * which returns a char *
+     * @param {object} payload
+     * @returns {Promise}
+     */
+    public searchQueryV2(payload: SearchPayload): Promise<SearchResponse> {
+
+        const {
+            q,
+            startDate,
+            endDate,
+            limit,
+            offset,
+            sortOrder,
+        } = payload;
+
+        let LIMIT = limit;
+        let OFFSET = offset;
+        let SORT_ORDER = sortOrder;
+
+        return new Promise((resolve) => {
+            if (!this.isInitialized) {
+                log.send(logLevels.ERROR, 'Library not initialized');
+                resolve({
+                    messages: [],
+                    more: 0,
+                    returned: 0,
+                    total: 0,
+                });
+                return;
+            }
+
+            if (!SORT_ORDER || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
+                SORT_ORDER = searchConfig.SORT_BY_DATE;
+            }
 
             if (!q) {
                 resolve({
@@ -416,6 +499,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * @param {String} fileType
      * @param {Boolean} sort
      * @returns {string}
+     * @deprecated
      */
     public constructQuery(searchQuery: string, senderId: string[], threadId: string[], fileType: string, sort: boolean): string {
 
@@ -479,6 +563,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * @param {String} fieldName
      * @param {Array} valueArray
      * @returns {string}
+     * @deprecated
      */
     private appendFilterQuery(searchText: string, fieldName: string, valueArray: any[]): string {
         let q = '';
@@ -508,6 +593,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * tags from the query
      * @param {String} searchText
      * @returns {Array}
+     * @deprecated
      */
     private getHashTags(searchText: string): any[string] {
         const hashTags: any[] = [];
@@ -529,6 +615,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * @param {String} searchText
      * @param {Boolean} sort
      * @returns {String}
+     * @deprecated
      */
     private getTextQuery(searchText: string, sort: boolean): string {
         const s1 = searchText.trim().toLowerCase();
@@ -565,6 +652,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * @param {Number} start
      * @param {Number} numTokens
      * @returns {String}
+     * @deprecated
      */
     private putTokensInRange(tokens: any[], start: number, numTokens: number): string {
         let out = '"';
