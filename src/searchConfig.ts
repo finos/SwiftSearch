@@ -16,6 +16,9 @@ const lz4Path = path.join(winLibraryPath, winLZ4ArchPath);
 
 const indexFolderPath = isDevEnv ? './' : userData;
 
+const winIndexValidatorArch = arch ? 'indexvalidator-x86.exe' : 'indexvalidator-x64.exe';
+const indexValidatorPath = isMac ? path.join(macLibraryPath, 'indexvalidator.exec') : path.join(winLibraryPath, winIndexValidatorArch);
+
 const winSearchLibArchPath = arch ? 'libsymphonysearch-x86.dll' : 'libsymphonysearch-x64.dll';
 const libraryPath = isMac ? path.join(macLibraryPath, 'libsymphonysearch.dylib') : path.join(winLibraryPath, winSearchLibArchPath);
 
@@ -29,6 +32,7 @@ const freeDiskSpace = path.join(pathToUtils, isDevEnv ? 'FreeDiskSpace/bin/Relea
 
 const libraryPaths = {
     FREE_DISK_SPACE: freeDiskSpace,
+    INDEX_VALIDATOR: indexValidatorPath,
     LIBRARY_FOLDER_PATH: libraryFolderPath,
     LZ4_PATH: lz4Path,
     MAC_LIBRARY_FOLDER: macLibraryPath,
