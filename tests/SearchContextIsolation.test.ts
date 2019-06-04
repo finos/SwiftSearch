@@ -51,11 +51,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
     };
 
     beforeAll(() => {
-        executionPath = path.join(__dirname, 'library');
-        if (isWindowsOS) {
-            executionPath = path.join(__dirname, '..', 'library');
-        }
-        userConfigDir = path.join(__dirname, '..');
+        setPath();
         if (fs.existsSync(configFile)) fs.unlinkSync(configFile);
         if (fs.existsSync(pathToLZ4)) fs.unlinkSync(pathToLZ4);
 
@@ -100,7 +96,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         const message1 = generatePostData(apiBridgeCmds.search,
             {
                 message: {
-                    q: 'test',
+                    q: "((text:('test')))",
                 },
                 requestId: 1,
             },
@@ -193,7 +189,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         const message1 = generatePostData(apiBridgeCmds.search,
             {
                 message: {
-                    q: 'test',
+                    q: "((text:('test')))",
                 },
                 requestId: 1,
             },
@@ -272,7 +268,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         const message1 = generatePostData(apiBridgeCmds.search,
             {
                 message: {
-                    q: 'testing',
+                    q: "((text:('testing')))",
                 },
                 requestId: 1,
             },
@@ -303,7 +299,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         const message1 = generatePostData(apiBridgeCmds.search,
             {
                 message: {
-                    q: 'John',
+                    q: "((text:('John')))",
                 },
                 requestId: 1,
             },
@@ -322,7 +318,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         const message2 = generatePostData(apiBridgeCmds.search,
             {
                 message: {
-                    q: 'John',
+                    q: "((text:('John')))",
                 },
                 requestId: 1,
             },
@@ -432,6 +428,119 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
         }), done));
         searchBridge.handleMessageEvents(message1);
     });
+
+    describe('Search with re-initialized', () => {
+        let newInstance: any;
+        beforeAll(() => {
+            executionPath = path.join(__dirname, 'library');
+            if (isWindowsOS) {
+                executionPath = path.join(__dirname, '..', 'library');
+            }
+            userConfigDir = path.join(__dirname, '..');
+
+            const SearchAPIBridge = require('../src/searchAPIBridge').default;
+            newInstance = new SearchAPIBridge();
+        });
+
+        it('should re-initial search', (done) => {
+            searchBridge = null;
+            const message1 = generatePostData(apiBridgeCmds.initialSearch,
+                {
+                    message: {
+                        key: Key,
+                        userId: UserID,
+                    },
+                    requestId: 1,
+                },
+            );
+            newInstance.setBroadcastMessage(getCallback.bind(null));
+            newInstance.handleMessageEvents(message1);
+            expect( spyConsoleInfo ).toHaveBeenCalledWith(expect.stringMatching(/Swift-Search Api Bridge Created/));
+            setTimeout(() => {
+                done();
+            }, 1000);
+        });
+
+        it('should return message after re-initialized time', (done) => {
+            const message1 = generatePostData(apiBridgeCmds.search,
+                {
+                    message: {
+                        q: "((text:('testing')))",
+                    },
+                    requestId: 1,
+                },
+            );
+            newInstance.setBroadcastMessage(getCallback.bind(null, generateResponseData(apiBridgeCmds.searchCallback, {
+                requestId: 1,
+                response: {messages: JSON.parse(getMessage('testing')), more: 0, returned: 1, total: 1},
+            }), done));
+            newInstance.handleMessageEvents(message1);
+        });
+
+        it('should re-initial search', (done) => {
+            const message1 = generatePostData(apiBridgeCmds.initialSearch,
+                {
+                    message: {
+                        key: Key,
+                        userId: UserID,
+                    },
+                    requestId: 1,
+                },
+            );
+            newInstance.setBroadcastMessage(getCallback.bind(null));
+            newInstance.handleMessageEvents(message1);
+            expect( spyConsoleInfo ).toHaveBeenCalledWith(expect.stringMatching(/Swift-Search Api Bridge Created/));
+            setTimeout(() => {
+                done();
+            }, 1000);
+        });
+
+        it('should return message after re-initialized time', (done) => {
+            const message1 = generatePostData(apiBridgeCmds.search,
+                {
+                    message: {
+                        q: "((text:('testing')))",
+                    },
+                    requestId: 1,
+                },
+            );
+            newInstance.setBroadcastMessage(getCallback.bind(null, generateResponseData(apiBridgeCmds.searchCallback, {
+                requestId: 1,
+                response: {messages: JSON.parse(getMessage('testing')), more: 0, returned: 1, total: 1},
+            }), done));
+            newInstance.handleMessageEvents(message1);
+        });
+    });
+
+    describe('Search Negative test cases', () => {
+        let tempInstance: any;
+
+        beforeAll(() => {
+            setPath();
+            const SearchAPIBridge = require('../src/searchAPIBridge').default;
+            tempInstance = new SearchAPIBridge();
+        });
+
+        it('should index validator throw error', (done) => {
+            const message = generatePostData(apiBridgeCmds.initialSearch,
+                {
+                    message: {
+                        key: 'jjjehdnctkiranddlskcjdhsnahsadndfnusdfsdfsd=',
+                        userId: UserID,
+                    },
+                },
+            );
+
+            tempInstance.setBroadcastMessage(getCallback.bind(null));
+            tempInstance.handleMessageEvents(message);
+            expect( spyConsoleInfo ).toHaveBeenCalledWith(expect.stringMatching(/Swift-Search Api Bridge Created/));
+            setTimeout(() => {
+                expect( spyConsoleError ).toHaveBeenCalledWith(expect.stringMatching(/Index Validation failed with error/));
+                expect( spyConsoleInfo ).toHaveBeenCalledWith(expect.stringMatching(/Index Corrupted/));
+            }, 1000);
+            setTimeout(() => done(), 3000);
+        });
+    });
 });
 
 /**
@@ -518,4 +627,12 @@ function getMessage(text: string, senderId: string = '71811853189821', threadId:
     }];
 
     return JSON.stringify(message);
+}
+
+function setPath() {
+    executionPath = path.join(__dirname, 'library');
+    if (isWindowsOS) {
+        executionPath = path.join(__dirname, '..', 'library');
+    }
+    userConfigDir = path.join(__dirname, '..');
 }

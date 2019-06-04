@@ -752,7 +752,7 @@ function indexValidator(this: Search, key: string) {
         log.send(logLevels.ERROR, 'Unable validate index folder status false');
         return false;
     } catch (err) {
-        log.send(logLevels.ERROR, `Index Validation failed with error -> ${err}`);
+        log.send(logLevels.ERROR, `Index Validation failed`);
         return false;
     }
 }
