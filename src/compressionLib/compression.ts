@@ -1,8 +1,7 @@
 import * as childProcess from 'child_process';
 import * as path from 'path';
 import * as util from 'util';
-import { log } from '../log/log';
-import { logLevels } from '../log/logLevels';
+import { logger } from '../log/logger';
 import { searchConfig } from '../searchConfig';
 import { isDevEnv, isMac} from '../utils/misc';
 
@@ -22,12 +21,12 @@ async function compression(pathToFolder: string, outputPath: string, callback: (
         try {
             const { stdout, stderr } = await exec(`cd "${ROOT_PATH}" && tar cf - "${pathToFolder}" | "${searchConfig.LIBRARY_CONSTANTS.MAC_LIBRARY_FOLDER}/lz4.exec" > "${outputPath}.tar.lz4"`);
             if (stderr) {
-                log.send(logLevels.INFO, `compression stderr: ${stderr}`);
+                logger.info(`compression: compression stderr: ${stderr}`);
             }
-            log.send(logLevels.INFO, `compression success stdout: ${stdout}`);
+            logger.info(`compression: compression success stdout: ${stdout}`);
             return callback(true);
         } catch (e) {
-            log.send(logLevels.INFO, `compression failed with error: ${e}`);
+            logger.info(`compression: compression failed with error: ${e}`);
             return callback(false);
         }
     } else {
@@ -35,12 +34,12 @@ async function compression(pathToFolder: string, outputPath: string, callback: (
             const drive = ROOT_PATH.substring(0, 2);
             const { stdout, stderr } = await exec(`${drive} && cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" cf - "${pathToFolder}" | "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" > "${outputPath}.tar.lz4"`);
             if (stderr) {
-                log.send(logLevels.INFO, `compression stderr: ${stderr}`);
+                logger.info(`compression: compression stderr: ${stderr}`);
             }
-            log.send(logLevels.INFO, `compression success stdout: ${stdout}`);
+            logger.info(`compression: compression success stdout: ${stdout}`);
             return callback(true);
         } catch (e) {
-            log.send(logLevels.INFO, `compression failed with error: ${e}`);
+            logger.info(`compression: compression failed with error: ${e}`);
             return callback(false);
         }
     }
@@ -58,12 +57,12 @@ async function decompression(pathName: string, callback: (status: boolean) => vo
         try {
             const { stdout, stderr } = await exec(`cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.MAC_LIBRARY_FOLDER}/lz4.exec" -d "${pathName}" | tar -xf - `);
             if (stderr) {
-                log.send(logLevels.INFO, `decompression stderr: ${stderr}`);
+                logger.info(`compression: decompression stderr: ${stderr}`);
             }
-            log.send(logLevels.INFO, `decompression success stdout: ${stdout}`);
+            logger.info(`compression: decompression success stdout: ${stdout}`);
             return callback(true);
         } catch (e) {
-            log.send(logLevels.INFO, `decompression failed with error: ${e}`);
+            logger.info(`compression: decompression failed with error: ${e}`);
             return callback(false);
         }
     } else {
@@ -71,12 +70,12 @@ async function decompression(pathName: string, callback: (status: boolean) => vo
             const drive = ROOT_PATH.substring(0, 2);
             const { stdout, stderr } = await exec(`${drive} && cd "${ROOT_PATH}" && "${searchConfig.LIBRARY_CONSTANTS.LZ4_PATH}" -d "${pathName}" | "${searchConfig.LIBRARY_CONSTANTS.WIN_LIBRARY_FOLDER}\\tar-win.exe" xf - `);
             if (stderr) {
-                log.send(logLevels.INFO, `decompression stderr: ${stderr}`);
+                logger.info(`compression: decompression stderr: ${stderr}`);
             }
-            log.send(logLevels.INFO, `decompression success stdout: ${stdout}`);
+            logger.info(`compression: decompression success stdout: ${stdout}`);
             return callback(true);
         } catch (e) {
-            log.send(logLevels.INFO, `decompression failed with error: ${e}`);
+            logger.info(`compression: decompression failed with error: ${e}`);
             return callback(false);
         }
     }

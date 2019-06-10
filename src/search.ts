@@ -3,8 +3,7 @@ import * as path from 'path';
 import * as ref from 'ref-napi';
 import { compression, decompression } from './compressionLib/compression';
 import { Message, SearchInterface, SearchPayload, SearchResponse, UserConfig } from './interface/interface';
-import { log } from './log/log';
-import { logLevels } from './log/logLevels';
+import { logger } from './log/logger';
 import { searchConfig } from './searchConfig';
 import { libSymphonySearch } from './searchLibrary';
 import { makeBoundTimedCollector } from './utils/queue';
@@ -65,13 +64,13 @@ export default class Search extends SearchUtils implements SearchInterface {
                     userConfig.indexVersion = searchConfig.INDEX_VERSION;
                     super.updateUserConfig(this.userId, userConfig)
                         .catch(() => {
-                            log.send(logLevels.ERROR, 'Error updating index version user config');
+                            logger.error('search: Error updating index version user config');
                         });
                 }
             })
             .catch(() => {
                 this.decompress(key, true);
-                log.send(logLevels.ERROR, 'Error reading user config');
+                logger.error('search: Error reading user config');
             });
     }
 
@@ -108,11 +107,11 @@ export default class Search extends SearchUtils implements SearchInterface {
 
                 clearSearchData.call(this);
                 if (res === undefined || res === null || res < 0) {
-                    log.send(logLevels.ERROR, 'Deserialization of Main Index Failed-> ' + error);
+                    logger.error(`search: Deserialization of Main Index Failed-> ${error}`);
                     this.isInitialized = true;
                     return;
                 }
-                log.send(logLevels.INFO, 'Deserialization of Main Index Successful-> ' + res);
+                logger.info(`search: Deserialization of Main Index Successful-> ${res}`);
                 const indexDateStartFrom = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
                 // Deleting all the messages except 3 Months from now
                 libSymphonySearch.symSEDeleteMessagesFromRAMIndex(null,
@@ -135,9 +134,9 @@ export default class Search extends SearchUtils implements SearchInterface {
         if (isFileExist.call(this, 'LZ4') && !reIndex) {
             decompression(`${userIndexPath}${searchConfig.TAR_LZ4_EXT}`, (status: boolean) => {
                 if (!status) {
-                    log.send(logLevels.INFO, 'decompression: failed re-creating index');
+                    logger.info('search: decompression: failed re-creating index');
                     clearSearchData.call(this);
-                    log.send(logLevels.INFO, 'Creating new index');
+                    logger.info('search: Creating new index');
                     fs.mkdirSync(userIndexPath);
                 }
                 this.init(key);
@@ -162,29 +161,29 @@ export default class Search extends SearchUtils implements SearchInterface {
         }
 
         if (!messages) {
-            log.send(logLevels.ERROR, 'Batch Indexing: Messages not provided');
+            logger.error('search: Batch Indexing: Messages not provided');
             return callback(false, 'Batch Indexing: Messages are required');
         }
 
         try {
             const messagesData = JSON.parse(messages);
             if (!(messagesData instanceof Array)) {
-                log.send(logLevels.ERROR, 'Batch Indexing: Messages must be an array');
+                logger.error('search: Batch Indexing: Messages must be an array');
                 return callback(false, 'Batch Indexing: Messages must be an array');
             }
         } catch (e) {
-            log.send(logLevels.ERROR, 'Batch Indexing: parse error -> ' + e);
+            logger.error(`search: Batch Indexing: parse error -> ${e}`);
             return callback(false, 'Batch Indexing parse error');
         }
 
         if (!this.isInitialized) {
-            log.send(logLevels.ERROR, 'Library not initialized');
+            logger.error('search: Library not initialized');
             return callback(false, 'Library not initialized');
         }
 
         libSymphonySearch.symSEIndexMainRAMAsync(messages, (err: any, res: any) => {
             if (err) {
-                log.send(logLevels.ERROR, `IndexBatch: Error indexing messages to memory : ${err}`);
+                logger.error(`search: IndexBatch: Error indexing messages to memory : ${err}`);
                 return callback(false, 'IndexBatch: Error indexing messages to memory');
             }
             return callback(true, res);
@@ -260,12 +259,12 @@ export default class Search extends SearchUtils implements SearchInterface {
             }
 
             if (!this.isInitialized) {
-                log.send(logLevels.ERROR, 'Library not initialized');
+                logger.error('search: Library not initialized');
                 return;
             }
             libSymphonySearch.symSESerializeMainIndexToEncryptedFoldersAsync(mainIndexFolder, key, (err: any, res: any) => {
                 if (res === undefined || res === null || res < 0) {
-                    log.send(logLevels.ERROR, 'Serializing Main Index Failed-> ' + err);
+                    logger.error(`search: Serializing Main Index Failed-> ${err}`);
                     if (isFileExist.call(this, 'USER_INDEX_PATH')) {
                         clearSearchData.call(this);
                     }
@@ -274,7 +273,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 const userIndexPath: string = `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`;
                 compression(userIndexPath, userIndexPath, (status: boolean) => {
                     if (!status) {
-                        log.send(logLevels.ERROR, 'Error Compressing Main Index Folder');
+                        logger.error('search: Error Compressing Main Index Folder');
                     }
                     clearSearchData.call(this);
                 });
@@ -307,7 +306,7 @@ export default class Search extends SearchUtils implements SearchInterface {
 
         return new Promise((resolve) => {
             if (!this.isInitialized) {
-                log.send(logLevels.ERROR, 'Library not initialized');
+                logger.error('search: Library not initialized');
                 resolve({
                     messages: [],
                     more: 0,
@@ -391,7 +390,7 @@ export default class Search extends SearchUtils implements SearchInterface {
 
         return new Promise((resolve) => {
             if (!this.isInitialized) {
-                log.send(logLevels.ERROR, 'Library not initialized');
+                logger.error('search: Library not initialized');
                 resolve({
                     messages: [],
                     more: 0,
@@ -461,13 +460,13 @@ export default class Search extends SearchUtils implements SearchInterface {
         }
 
         if (!this.isInitialized) {
-            log.send(logLevels.ERROR, 'Library not initialized');
+            logger.error('search: Library not initialized');
             return callback(false, 'Not initialized');
         }
 
         libSymphonySearch.symSEMainRAMIndexGetLastMessageTimestampAsync((err: any, res: any) => {
             if (err) {
-                log.send(logLevels.ERROR, 'Error getting the index timestamp ->' + err);
+                logger.error(`search: Error getting the index timestamp -> ${err}`);
                 return callback(false, 'Error getting the index timestamp');
             }
             const returnedResult = res;
@@ -679,7 +678,7 @@ function clearSearchData(this: Search): void {
                     try {
                         fs.unlinkSync(curPath);
                     } catch (e) {
-                        log.send(logLevels.WARN, 'clearSearchData -> Error removing index file ' +
+                        logger.warn('search: clearSearchData -> Error removing index file ' +
                             '(nothing to worry this will be replaced by lz4 extraction)');
                     }
                 }
@@ -687,7 +686,7 @@ function clearSearchData(this: Search): void {
             try {
                 fs.rmdirSync(filePath);
             } catch (e) {
-                log.send(logLevels.WARN, 'clearSearchData -> Error removing index dir ' +
+                logger.warn('search: clearSearchData -> Error removing index dir ' +
                     '(nothing to worry this will be replaced by lz4 extraction)');
             }
         }

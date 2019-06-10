@@ -5,8 +5,7 @@ import {
     PostSuccessCallback,
     SSAPIBridgeInterface,
 } from './interface/interface';
-import { log } from './log/log';
-import { logLevels } from './log/logLevels';
+import { logger } from './log/logger';
 import Search from './search';
 import SearchUtils from './utils/searchUtils';
 
@@ -33,7 +32,7 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
     }
 
     private static initSearch(data: any): void {
-        log.send(logLevels.INFO, 'Swift-Search Api Bridge Created');
+        logger.info('searchAPIBridge: Swift-Search Api Bridge Created');
         const { userId, key } = data;
         SwiftSearchAPI = new Search(userId, key);
     }
