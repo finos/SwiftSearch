@@ -25,9 +25,9 @@ const makeBoundTimedCollector = (isIndexing: any, timeout: any, callback: any) =
 
     function handleRealTimeResponse(status: boolean, response: string): void {
         if (status) {
-            logger.info(`queue: status -> ${status}, response -> ${response}`);
+            logger.info(`queue: status`, { status, response });
         } else {
-            logger.error(`queue: error -> ${response}`);
+            logger.error(`queue: error`, response);
         }
 
     }
@@ -37,7 +37,7 @@ const makeBoundTimedCollector = (isIndexing: any, timeout: any, callback: any) =
         timer = null;
         resetQueue();
         if (queue) {
-            logger.info(`queue: flush length ${queue.length}`);
+            logger.info(`queue: flush length`, queue.length);
             callback(JSON.stringify(queue), handleRealTimeResponse.bind(this));
         }
     }

@@ -9,7 +9,7 @@ import { logger } from '../log/logger';
  */
 export const getCommandLineArgs = (argv: string[], argName: string, exactMatch: boolean): string | null => {
     if (!Array.isArray(argv)) {
-        logger.warn(`getCommandLineArgs: TypeError invalid func arg, must be an array: ${argv}`);
+        logger.warn(`getCommandLineArgs: TypeError invalid func arg, must be an array`, argv);
         return null;
     }
 

@@ -107,11 +107,11 @@ export default class Search extends SearchUtils implements SearchInterface {
 
                 clearSearchData.call(this);
                 if (res === undefined || res === null || res < 0) {
-                    logger.error(`search: Deserialization of Main Index Failed-> ${error}`);
+                    logger.error(`search: Deserialization of Main Index Failed`, error);
                     this.isInitialized = true;
                     return;
                 }
-                logger.info(`search: Deserialization of Main Index Successful-> ${res}`);
+                logger.info(`search: Deserialization of Main Index Successful`, res);
                 const indexDateStartFrom = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
                 // Deleting all the messages except 3 Months from now
                 libSymphonySearch.symSEDeleteMessagesFromRAMIndex(null,
@@ -172,7 +172,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 return callback(false, 'Batch Indexing: Messages must be an array');
             }
         } catch (e) {
-            logger.error(`search: Batch Indexing: parse error -> ${e}`);
+            logger.error(`search: Batch Indexing: parse error`, e);
             return callback(false, 'Batch Indexing parse error');
         }
 
@@ -183,7 +183,7 @@ export default class Search extends SearchUtils implements SearchInterface {
 
         libSymphonySearch.symSEIndexMainRAMAsync(messages, (err: any, res: any) => {
             if (err) {
-                logger.error(`search: IndexBatch: Error indexing messages to memory : ${err}`);
+                logger.error(`search: IndexBatch: Error indexing messages to memory`, err);
                 return callback(false, 'IndexBatch: Error indexing messages to memory');
             }
             return callback(true, res);
@@ -264,7 +264,7 @@ export default class Search extends SearchUtils implements SearchInterface {
             }
             libSymphonySearch.symSESerializeMainIndexToEncryptedFoldersAsync(mainIndexFolder, key, (err: any, res: any) => {
                 if (res === undefined || res === null || res < 0) {
-                    logger.error(`search: Serializing Main Index Failed-> ${err}`);
+                    logger.error(`search: Serializing Main Index Failed`, err);
                     if (isFileExist.call(this, 'USER_INDEX_PATH')) {
                         clearSearchData.call(this);
                     }
@@ -466,7 +466,7 @@ export default class Search extends SearchUtils implements SearchInterface {
 
         libSymphonySearch.symSEMainRAMIndexGetLastMessageTimestampAsync((err: any, res: any) => {
             if (err) {
-                logger.error(`search: Error getting the index timestamp -> ${err}`);
+                logger.error(`search: Error getting the index timestamp`, err);
                 return callback(false, 'Error getting the index timestamp');
             }
             const returnedResult = res;
