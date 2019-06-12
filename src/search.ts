@@ -16,6 +16,8 @@ import SearchUtils from './utils/searchUtils';
  */
 
 export default class Search extends SearchUtils implements SearchInterface {
+    public validatorResponse: null;
+
     public readonly userId: string;
     private isInitialized: boolean;
     private isRealTimeIndexing: boolean;
@@ -31,6 +33,7 @@ export default class Search extends SearchUtils implements SearchInterface {
         this.isInitialized = false;
         this.userId = userId;
         this.isRealTimeIndexing = false;
+        this.validatorResponse = null;
         this.getUserConfig(key);
         this.collector = makeBoundTimedCollector(this.checkIsRealTimeIndexing.bind(this),
             searchConfig.REAL_TIME_INDEXING_TIME, this.realTimeIndexing.bind(this));
@@ -746,6 +749,7 @@ function indexValidator(this: Search, key: string) {
         const result = execFileSync(searchConfig.LIBRARY_CONSTANTS.INDEX_VALIDATOR, [ mainIndexFolder, key ]).toString();
         logger.info(`Index validator response ->`, result);
         const data = JSON.parse(result);
+        this.validatorResponse = data;
         if (data.status === 'OK') {
             return true;
         }
