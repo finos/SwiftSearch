@@ -106,7 +106,7 @@ export default class Search extends SearchUtils implements SearchInterface {
             const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
             if (!indexValidator.call(this, key)) {
                 this.isInitialized = true;
-                log.send(logLevels.INFO, `Index Corrupted`);
+                logger.info(`Index Corrupted`);
                 return;
             }
             libSymphonySearch.symSEDeserializeMainIndexToEncryptedFoldersAsync(mainIndexFolder, key, (error: never, res: number) => {
@@ -744,15 +744,15 @@ function indexValidator(this: Search, key: string) {
     const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
     try {
         const result = execFileSync(searchConfig.LIBRARY_CONSTANTS.INDEX_VALIDATOR, [ mainIndexFolder, key ]).toString();
-        log.send(logLevels.INFO, `Index validator response -> ${result}`);
+        logger.info(`Index validator response ->`, result);
         const data = JSON.parse(result);
         if (data.status === 'OK') {
             return true;
         }
-        log.send(logLevels.ERROR, 'Unable validate index folder status false');
+        logger.error('Unable validate index folder status false');
         return false;
     } catch (err) {
-        log.send(logLevels.ERROR, `Index Validation failed`);
+        logger.error(`Index Validation failed`);
         return false;
     }
 }
