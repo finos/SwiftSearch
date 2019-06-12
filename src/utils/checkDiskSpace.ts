@@ -1,7 +1,6 @@
 import * as childProcess from 'child_process';
 import * as util from 'util';
-import { log } from '../log/log';
-import { logLevels } from '../log/logLevels';
+import { logger } from '../log/logger';
 import { searchConfig } from '../searchConfig';
 import { isMac } from './misc';
 
@@ -25,7 +24,7 @@ async function checkDiskSpace(): Promise<boolean> {
         try {
             const { stdout, stderr } = await exec("df -k '" + userDataPath.replace(/'/g, "'\\''") + "'");
             if (stderr) {
-                log.send(logLevels.ERROR, `Error retrieving available disk space ${stderr}`);
+                logger.error(`checkDiskSpace: Error retrieving available disk space`, stderr);
                 return false;
             }
             const data = stdout.trim().split('\n');
@@ -35,7 +34,7 @@ async function checkDiskSpace(): Promise<boolean> {
             const space: number = parseInt(freeSpace[ 3 ], 10) * 1024;
             return space >= searchConfig.MINIMUM_DISK_SPACE;
         } catch (e) {
-            log.send(logLevels.ERROR, `Error child_process error ${e}`);
+            logger.error(`checkDiskSpace: Error child_process error`, e);
             return false;
         }
 
@@ -43,7 +42,7 @@ async function checkDiskSpace(): Promise<boolean> {
         try {
             const { stdout, stderr } = await exec(`"${searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE}" ${userDataPath}`);
             if (stderr) {
-                log.send(logLevels.ERROR, `Error retrieving available disk space ${stderr}`);
+                logger.error(`checkDiskSpace: Error retrieving available disk space`, stderr);
                 return false;
             }
             const data: string[] = stdout.trim().split(',');
@@ -59,7 +58,7 @@ async function checkDiskSpace(): Promise<boolean> {
             const diskInfoStr: number = parseInt(data[ 0 ], 10);
             return diskInfoStr >= searchConfig.MINIMUM_DISK_SPACE;
         } catch (e) {
-            log.send(logLevels.ERROR, `Error child_process error ${e}`);
+            logger.error(`checkDiskSpace: Error child_process error`, e);
             return false;
         }
     }

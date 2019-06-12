@@ -1,6 +1,4 @@
-import { log } from '../log/log';
-import { logLevels } from '../log/logLevels';
-
+import { logger } from '../log/logger';
 /**
  * Search given argv for argName using exact match or starts with. Comparison is case insensitive
  * @param  {Array} argv       Array of strings
@@ -9,12 +7,14 @@ import { logLevels } from '../log/logLevels';
  * try finding arg that starts with argName.
  * @return {String}           If found, returns the arg, otherwise null.
  */
-function getCmdLineArg(argv: string[], argName: string, exactMatch: boolean) {
+export const getCommandLineArgs = (argv: string[], argName: string, exactMatch: boolean): string | null => {
     if (!Array.isArray(argv)) {
-        log.send(logLevels.WARN, 'getCmdLineArg: TypeError invalid func arg, must be an array: ' + argv);
+        logger.warn(`getCommandLineArgs: TypeError invalid func arg, must be an array`, argv);
         return null;
     }
+
     const argNameToFind = argName.toLocaleLowerCase();
+
     for (let i = 0, len = argv.length; i < len; i++) {
         const arg = argv[i].toLocaleLowerCase();
         if ((exactMatch && arg === argNameToFind) ||
@@ -24,6 +24,4 @@ function getCmdLineArg(argv: string[], argName: string, exactMatch: boolean) {
     }
 
     return null;
-}
-
-export { getCmdLineArg };
+};

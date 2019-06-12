@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { SearchUtilsInterface, UserConfig } from '../interface/interface';
-import { log } from '../log/log';
-import { logLevels } from '../log/logLevels';
+import { logger } from '../log/logger';
 import { searchConfig } from '../searchConfig';
 import { checkDiskSpace } from './checkDiskSpace';
 
@@ -97,7 +96,7 @@ function createUser(userId: string, oldConfig: UserConfig): void {
 
     fs.writeFile(configPath, jsonNewConfig, 'utf8', (err) => {
         if (err) {
-            log.send(logLevels.ERROR, 'Error creating new user');
+            logger.error('searchUtils: Error creating new user');
         }
     });
 }

@@ -2,7 +2,7 @@ import * as os from 'os';
 
 const isDevEnv: boolean = process.env.ELECTRON_DEV ?
     process.env.ELECTRON_DEV.trim().toLowerCase() === 'true' : false;
-
+const isElectronQA = !!process.env.ELECTRON_QA;
 const isMac: boolean = (process.platform === 'darwin');
 const isWindowsOS: boolean = (process.platform === 'win32');
 
@@ -19,4 +19,5 @@ export {
     isWindowsOS,
     isNodeEnv,
     isWindows10,
+    isElectronQA,
 };
