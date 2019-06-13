@@ -103,7 +103,7 @@ export interface SearchPayload {
 export interface SearchInterface {
     getUserConfig(key: string): void;
     isLibInit(): boolean;
-    init(key: string): void;
+    init(key: string, isDecompressed: boolean): Promise<void>;
     decompress(key: string, reIndex: boolean): void;
     indexBatch(messages: string, callback: any): any;
     batchRealTimeIndexing(message: Message[]): void;
@@ -172,6 +172,7 @@ export enum apiBridgeCmds {
     encryptIndex = 'swift-search::encrypt-index',
     realTimeIndex = 'swift-search::real-time-index',
     deleteRealTimeIndex = 'swift-search::delete-real-time-index',
+    getValidatorResponse = 'swift-search::get-validator-response',
 
     // Search Utils
     checkDiskSpace = 'swift-search::check-disk-space',
@@ -186,4 +187,5 @@ export enum apiBridgeCmds {
     updateUserConfigCallback = 'swift-search::update-user-config-callback',
     getLatestTimestampCallback = 'swift-search::get-latest-timestamp-callback',
     encryptIndexCallback = 'swift-search::encrypt-index-callback',
+    getValidatorResponseCallback = 'swift-search::get-validator-response-callback',
 }

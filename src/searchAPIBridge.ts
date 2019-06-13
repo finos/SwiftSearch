@@ -58,6 +58,13 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
         );
     });
 
+    public getValidatorResponseCallback = ((requestId: number, data: any): void => {
+        this.eventCallback(
+            apiBridgeCmds.swiftSearch,
+            makePayload({ requestId, method: apiBridgeCmds.getValidatorResponseCallback, response: data }),
+        );
+    });
+
     private SearchUtils: SearchUtils;
     private eventCallback: any;
 
@@ -107,6 +114,9 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
                 break;
             case apiBridgeCmds.deleteRealTimeIndex:
                 this.deleteRealTimeFolder();
+                break;
+            case apiBridgeCmds.getValidatorResponse:
+                this.getValidatorResponseCallback(data.requestId, SwiftSearchAPI.validatorResponse);
                 break;
             default:
                 break;

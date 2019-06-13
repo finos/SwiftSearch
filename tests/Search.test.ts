@@ -268,11 +268,11 @@ describe('Tests for Search', () => {
 
         it('should match message length', (done) => {
             const searchQuery = jest.spyOn(SearchApi, 'searchQuery');
-            SearchApi.searchQuery('realtime working', ['71811853189212'],
+            SearchApi.searchQuery('realtime', ['71811853189212'],
                 ['Au8O2xKHyX1LtE6zW019GX///rZYegAtdA=='],
                 '', undefined, undefined,
                 25, 0, 0).then((res: SearchResponse) => {
-                expect(res.messages.length).toEqual(4);
+                expect(res.messages.length).toEqual(1);
                 const msg = res.messages;
                 expect(msg[0].renderingBlob).toEqual('{"customEntities":[],"entityJSON":{},"presentationML":"<div data-format=\\"PresentationML\\" data-version=\\"2.0\\" class=\\"wysiwyg\\"><p>texgsd</p></div>","format":"com.symphony.messageml.v2"}');
                 expect(searchQuery).toHaveBeenCalled();
@@ -455,7 +455,7 @@ describe('Tests for Search', () => {
 
         it('should decrypt the index', (done) => {
             const init = jest.spyOn(SearchApi, 'init');
-            SearchApi.init(key);
+            SearchApi.init(key, true);
             expect(init).toHaveBeenCalled();
             done();
         });

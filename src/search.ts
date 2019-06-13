@@ -1,6 +1,8 @@
+import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as ref from 'ref-napi';
+import * as util from 'util';
 import { compression, decompression } from './compressionLib/compression';
 import { Message, SearchInterface, SearchPayload, SearchResponse, UserConfig } from './interface/interface';
 import { logger } from './log/logger';
@@ -9,12 +11,16 @@ import { libSymphonySearch } from './searchLibrary';
 import { makeBoundTimedCollector } from './utils/queue';
 import SearchUtils from './utils/searchUtils';
 
+const exec = util.promisify(childProcess.exec);
+
 /**
  * This search class communicates with the SymphonySearchEngine C library via node-ffi.
  * There should be only 1 instance of this class in the Electron
  */
 
 export default class Search extends SearchUtils implements SearchInterface {
+    public validatorResponse: null;
+
     public readonly userId: string;
     private isInitialized: boolean;
     private isRealTimeIndexing: boolean;
@@ -30,6 +36,7 @@ export default class Search extends SearchUtils implements SearchInterface {
         this.isInitialized = false;
         this.userId = userId;
         this.isRealTimeIndexing = false;
+        this.validatorResponse = null;
         this.getUserConfig(key);
         this.collector = makeBoundTimedCollector(this.checkIsRealTimeIndexing.bind(this),
             searchConfig.REAL_TIME_INDEXING_TIME, this.realTimeIndexing.bind(this));
@@ -87,7 +94,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * initialise the SymphonySearchEngine library
      * and creates a folder in the userData
      */
-    public init(key: string): void {
+    public async init(key: string, isDecompressed: boolean): Promise<void> {
         if (!key) {
             return;
         }
@@ -101,8 +108,15 @@ export default class Search extends SearchUtils implements SearchInterface {
         libSymphonySearch.symSEClearRealtimeRAMIndex();
         const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
-        if (isFileExist.call(this, 'USER_INDEX_PATH')) {
+        if (isFileExist.call(this, 'USER_INDEX_PATH') && isDecompressed) {
             const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
+            const validatorResponse = await indexValidator.call(this, key);
+            logger.info(`Index validator response`, validatorResponse);
+            if (!validatorResponse) {
+                this.isInitialized = true;
+                logger.info(`Index Corrupted`);
+                return;
+            }
             libSymphonySearch.symSEDeserializeMainIndexToEncryptedFoldersAsync(mainIndexFolder, key, (error: never, res: number) => {
 
                 clearSearchData.call(this);
@@ -118,6 +132,9 @@ export default class Search extends SearchUtils implements SearchInterface {
                     searchConfig.MINIMUM_DATE, indexDateStartFrom.toString());
                 this.isInitialized = true;
             });
+        } else {
+            this.isInitialized = true;
+            clearSearchData.call(this);
         }
     }
 
@@ -133,19 +150,21 @@ export default class Search extends SearchUtils implements SearchInterface {
         clearSearchData.call(this);
         if (isFileExist.call(this, 'LZ4') && !reIndex) {
             decompression(`${userIndexPath}${searchConfig.TAR_LZ4_EXT}`, (status: boolean) => {
+                let decompressedStatus = true;
                 if (!status) {
                     logger.info('search: decompression: failed re-creating index');
                     clearSearchData.call(this);
                     logger.info('search: Creating new index');
                     fs.mkdirSync(userIndexPath);
+                    decompressedStatus = false;
                 }
-                this.init(key);
+                this.init(key, decompressedStatus);
             });
         } else {
             if (!isFileExist.call(this, 'USER_INDEX_PATH')) {
                 fs.mkdirSync(userIndexPath);
             }
-            this.init(key);
+            this.init(key, false);
         }
     }
 
@@ -720,4 +739,37 @@ function isFileExist(this: Search, type: string): boolean {
     searchPath = paths[type];
 
     return searchPath && fs.existsSync(searchPath);
+}
+
+/**
+ * Validate Index before initializing the index
+ * to prevent unexpected crashes due to corrupted index
+ * @param {string} key
+ */
+async function indexValidator(this: Search, key: string): Promise<boolean> {
+    const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
+        `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
+    const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
+    try {
+        const { stdout } = await exec(`"${searchConfig.LIBRARY_CONSTANTS.INDEX_VALIDATOR}" "${mainIndexFolder}" "${key}"`);
+        const data = JSON.parse(stdout);
+        logger.info(`Index validator response`, { stdout: data });
+        this.validatorResponse = data;
+        if (data.status === 'OK') {
+            return true;
+        }
+        logger.error('Unable validate index folder status false');
+        return false;
+    } catch (err) {
+        if (err.stdout) {
+            try {
+                this.validatorResponse = JSON.parse(err.stdout);
+            } catch (e) {
+                this.validatorResponse = null;
+            }
+            logger.error(`Index Validation error stdout`, { stdoutError: err.stdout });
+        }
+        logger.error(`Index Validation failed / Corrupted`);
+        return false;
+    }
 }
