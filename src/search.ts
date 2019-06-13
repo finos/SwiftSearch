@@ -1,7 +1,8 @@
-import { execFileSync } from 'child_process';
+import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as ref from 'ref-napi';
+import * as util from 'util';
 import { compression, decompression } from './compressionLib/compression';
 import { Message, SearchInterface, SearchPayload, SearchResponse, UserConfig } from './interface/interface';
 import { logger } from './log/logger';
@@ -9,6 +10,8 @@ import { searchConfig } from './searchConfig';
 import { libSymphonySearch } from './searchLibrary';
 import { makeBoundTimedCollector } from './utils/queue';
 import SearchUtils from './utils/searchUtils';
+
+const exec = util.promisify(childProcess.exec);
 
 /**
  * This search class communicates with the SymphonySearchEngine C library via node-ffi.
@@ -91,7 +94,7 @@ export default class Search extends SearchUtils implements SearchInterface {
      * initialise the SymphonySearchEngine library
      * and creates a folder in the userData
      */
-    public init(key: string, isDecompressed: boolean): void {
+    public async init(key: string, isDecompressed: boolean): Promise<void> {
         if (!key) {
             return;
         }
@@ -107,7 +110,9 @@ export default class Search extends SearchUtils implements SearchInterface {
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
         if (isFileExist.call(this, 'USER_INDEX_PATH') && isDecompressed) {
             const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
-            if (!indexValidator.call(this, key)) {
+            const validatorResponse = await indexValidator.call(this, key);
+            logger.info(`Index validator response`, validatorResponse);
+            if (!validatorResponse) {
                 this.isInitialized = true;
                 logger.info(`Index Corrupted`);
                 return;
@@ -741,14 +746,14 @@ function isFileExist(this: Search, type: string): boolean {
  * to prevent unexpected crashes due to corrupted index
  * @param {string} key
  */
-function indexValidator(this: Search, key: string) {
+async function indexValidator(this: Search, key: string): Promise<boolean> {
     const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
         `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
     const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
     try {
-        const result = execFileSync(searchConfig.LIBRARY_CONSTANTS.INDEX_VALIDATOR, [ mainIndexFolder, key ]).toString();
-        logger.info(`Index validator response ->`, result);
-        const data = JSON.parse(result);
+        const { stdout } = await exec(`"${searchConfig.LIBRARY_CONSTANTS.INDEX_VALIDATOR}" "${mainIndexFolder}" "${key}"`);
+        const data = JSON.parse(stdout);
+        logger.info(`Index validator response`, { stdout: data });
         this.validatorResponse = data;
         if (data.status === 'OK') {
             return true;
@@ -756,7 +761,15 @@ function indexValidator(this: Search, key: string) {
         logger.error('Unable validate index folder status false');
         return false;
     } catch (err) {
-        logger.error(`Index Validation failed`);
+        if (err.stdout) {
+            try {
+                this.validatorResponse = JSON.parse(err.stdout);
+            } catch (e) {
+                this.validatorResponse = null;
+            }
+            logger.error(`Index Validation error stdout`, { stdoutError: err.stdout });
+        }
+        logger.error(`Index Validation failed / Corrupted`);
         return false;
     }
 }

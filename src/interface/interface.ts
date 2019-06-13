@@ -103,7 +103,7 @@ export interface SearchPayload {
 export interface SearchInterface {
     getUserConfig(key: string): void;
     isLibInit(): boolean;
-    init(key: string, isDecompressed: boolean): void;
+    init(key: string, isDecompressed: boolean): Promise<void>;
     decompress(key: string, reIndex: boolean): void;
     indexBatch(messages: string, callback: any): any;
     batchRealTimeIndexing(message: Message[]): void;
