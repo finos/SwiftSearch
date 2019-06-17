@@ -25,3 +25,4 @@ package-lock.json
 library
 *.log
 coverage
+lib
