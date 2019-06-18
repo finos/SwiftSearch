@@ -12,6 +12,7 @@ import { makeBoundTimedCollector } from './utils/queue';
 import SearchUtils from './utils/searchUtils';
 
 const exec = util.promisify(childProcess.exec);
+const SEARCH_SUPPORTED_VERSION = '1.55.3';
 
 /**
  * This search class communicates with the SymphonySearchEngine C library via node-ffi.
@@ -33,6 +34,12 @@ export default class Search extends SearchUtils implements SearchInterface {
      */
     constructor(userId: string, key: string) {
         super();
+        logger.info(`-------------------- Starting Swift-Search --------------------`);
+        const versionInfo = {
+            indexVersion: searchConfig.INDEX_VERSION,
+            supportedVersion: SEARCH_SUPPORTED_VERSION,
+        };
+        process.env.SWIFT_SEARCH = JSON.stringify(versionInfo);
         this.isInitialized = false;
         this.userId = userId;
         this.isRealTimeIndexing = false;
@@ -111,10 +118,11 @@ export default class Search extends SearchUtils implements SearchInterface {
         if (isFileExist.call(this, 'USER_INDEX_PATH') && isDecompressed) {
             const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
             const validatorResponse = await indexValidator.call(this, key);
-            logger.info(`Index validator response`, validatorResponse);
+            logger.info(`search: Index validator response`, validatorResponse);
             if (!validatorResponse) {
                 this.isInitialized = true;
-                logger.info(`Index Corrupted`);
+                logger.info(`search: Index Corrupted`);
+                logger.info(`-------------------- search: Initializing Fresh Index --------------------`);
                 return;
             }
             libSymphonySearch.symSEDeserializeMainIndexToEncryptedFoldersAsync(mainIndexFolder, key, (error: never, res: number) => {
@@ -131,8 +139,10 @@ export default class Search extends SearchUtils implements SearchInterface {
                 libSymphonySearch.symSEDeleteMessagesFromRAMIndex(null,
                     searchConfig.MINIMUM_DATE, indexDateStartFrom.toString());
                 this.isInitialized = true;
+                logger.info(`-------------------- Initialization Complete --------------------`);
             });
         } else {
+            logger.info(`-------------------- Initializing Fresh Index --------------------`);
             this.isInitialized = true;
             clearSearchData.call(this);
         }
@@ -294,6 +304,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                     if (!status) {
                         logger.error('search: Error Compressing Main Index Folder');
                     }
+                    logger.info(`-------------------- Compression Complete --------------------`);
                     clearSearchData.call(this);
                 });
                 resolve();
@@ -753,12 +764,12 @@ async function indexValidator(this: Search, key: string): Promise<boolean> {
     try {
         const { stdout } = await exec(`"${searchConfig.LIBRARY_CONSTANTS.INDEX_VALIDATOR}" "${mainIndexFolder}" "${key}"`);
         const data = JSON.parse(stdout);
-        logger.info(`Index validator response`, { stdout: data });
+        logger.info(`search: Index validator response`, { stdout: data });
         this.validatorResponse = data;
         if (data.status === 'OK') {
             return true;
         }
-        logger.error('Unable validate index folder status false');
+        logger.error('search: Unable validate index folder status false');
         return false;
     } catch (err) {
         if (err.stdout) {
@@ -767,9 +778,9 @@ async function indexValidator(this: Search, key: string): Promise<boolean> {
             } catch (e) {
                 this.validatorResponse = null;
             }
-            logger.error(`Index Validation error stdout`, { stdoutError: err.stdout });
+            logger.error(`search: Index Validation error stdout`, { stdoutError: err.stdout });
         }
-        logger.error(`Index Validation failed / Corrupted`);
+        logger.error(`search: Index Validation failed / Corrupted`);
         return false;
     }
 }

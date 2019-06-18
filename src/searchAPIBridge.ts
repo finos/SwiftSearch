@@ -32,7 +32,7 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
     }
 
     private static initSearch(data: any): void {
-        logger.info('searchAPIBridge: Swift-Search Api Bridge Created');
+        logger.info(`-------------------- Swift-Search Api Bridge Created --------------------`);
         const { userId, key } = data;
         SwiftSearchAPI = new Search(userId, key);
     }
@@ -81,6 +81,7 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
         const { method, message } = data;
 
         if (!SSAPIBridge.isLibInit() && !WHITELIST[method]) {
+            logger.info(`-------------------- searchAPIBridge: Call was made before Initializing --------------------`);
             return;
         }
 
