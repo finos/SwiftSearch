@@ -12,7 +12,6 @@ import { makeBoundTimedCollector } from './utils/queue';
 import SearchUtils from './utils/searchUtils';
 
 const exec = util.promisify(childProcess.exec);
-const SEARCH_SUPPORTED_VERSION = '1.55.3';
 
 /**
  * This search class communicates with the SymphonySearchEngine C library via node-ffi.
@@ -35,11 +34,6 @@ export default class Search extends SearchUtils implements SearchInterface {
     constructor(userId: string, key: string) {
         super();
         logger.info(`-------------------- Starting Swift-Search --------------------`);
-        const versionInfo = {
-            indexVersion: searchConfig.INDEX_VERSION,
-            supportedVersion: SEARCH_SUPPORTED_VERSION,
-        };
-        process.env.SWIFT_SEARCH = JSON.stringify(versionInfo);
         this.isInitialized = false;
         this.userId = userId;
         this.isRealTimeIndexing = false;
