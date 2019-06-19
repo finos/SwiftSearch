@@ -12,6 +12,7 @@ export default class SearchUtils implements SearchUtilsInterface {
     public readonly indexVersion: string;
 
     constructor() {
+        logger.info(`-------------------- Swift-Search Utils Initialized --------------------`);
         this.indexVersion = searchConfig.INDEX_VERSION;
     }
 
