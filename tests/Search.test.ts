@@ -715,12 +715,8 @@ describe('Tests for Search', () => {
             searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH = './tp';
             if (isWindowsOS) {
                 searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH = 'A://test';
-                searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE = path.join(__dirname, '..',
-                    'node_modules/electron-utils/FreeDiskSpace/bin/Release/FreeDiskSpace.exe');
             }
             SearchUtilsAPI.checkFreeSpace().then((err: never) => {
-                searchConfig.LIBRARY_CONSTANTS.FREE_DISK_SPACE = path.join(__dirname, '..',
-                    'library/FreeDiskSpace.exe');
                 expect(checkFreeSpace).toHaveBeenCalled();
                 expect(err).toBe(false);
                 done();
