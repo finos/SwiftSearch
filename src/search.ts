@@ -4,7 +4,14 @@ import * as path from 'path';
 import * as ref from 'ref';
 import * as util from 'util';
 import { compression, decompression } from './compressionLib/compression';
-import { Message, SearchInterface, SearchPayload, SearchResponse, UserConfig } from './interface/interface';
+import {
+    Message,
+    SearchInitialPayload,
+    SearchInterface,
+    SearchPayload,
+    SearchResponse,
+    UserConfig,
+} from './interface/interface';
 import { logger } from './log/logger';
 import { searchConfig } from './searchConfig';
 import { libSymphonySearch } from './searchLibrary';
@@ -25,15 +32,18 @@ export default class Search extends SearchUtils implements SearchInterface {
     private isInitialized: boolean;
     private isRealTimeIndexing: boolean;
     private readonly collector: any;
+    private readonly searchPeriodSubtract: number;
 
     /**
      * Constructor for the SymphonySearchEngine library
      * @param userId (for the index folder name)
      * @param key
+     * @param payload
      */
-    constructor(userId: string, key: string) {
+    constructor(userId: string, key: string, payload: SearchInitialPayload) {
         super();
         logger.info(`-------------------- Starting Swift-Search --------------------`);
+        this.searchPeriodSubtract = (payload && payload.searchPeriod) || searchConfig.SEARCH_PERIOD_SUBTRACTOR;
         this.isInitialized = false;
         this.userId = userId;
         this.isRealTimeIndexing = false;
@@ -128,7 +138,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                     return;
                 }
                 logger.info(`search: Deserialization of Main Index Successful`, res);
-                const indexDateStartFrom = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
+                const indexDateStartFrom = new Date().getTime() - this.searchPeriodSubtract;
                 // Deleting all the messages except 3 Months from now
                 libSymphonySearch.symSEDeleteMessagesFromRAMIndex(null,
                     searchConfig.MINIMUM_DATE, indexDateStartFrom.toString());
@@ -356,7 +366,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 return;
             }
 
-            const searchPeriod = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
+            const searchPeriod = new Date().getTime() - this.searchPeriodSubtract;
             let startDateTime = searchPeriod;
             if (startDate) {
                 startDateTime = new Date(parseInt(startDate, 10)).getTime();
@@ -438,7 +448,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 return;
             }
 
-            const searchPeriod = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
+            const searchPeriod = new Date().getTime() - this.searchPeriodSubtract;
             let startDateTime = searchPeriod;
             if (startDate) {
                 startDateTime = new Date(parseInt(startDate, 10)).getTime();

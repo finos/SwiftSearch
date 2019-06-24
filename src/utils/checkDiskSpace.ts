@@ -3,7 +3,7 @@ import { logger } from '../log/logger';
 import { searchConfig } from '../searchConfig';
 import { isMac } from './misc';
 
-async function checkDiskSpace(): Promise<boolean> {
+async function checkDiskSpace(minimumDiskSpace: number): Promise<boolean> {
     let userDataPath: string = searchConfig.FOLDERS_CONSTANTS.USER_DATA_PATH;
     if (!isMac) {
         try {
@@ -28,7 +28,7 @@ async function checkDiskSpace(): Promise<boolean> {
             return false;
         }
 
-        return free >= searchConfig.MINIMUM_DISK_SPACE;
+        return free >= minimumDiskSpace;
     } catch (e) {
         logger.error(`checkDiskSpace: Error diskusage`, e);
         return false;

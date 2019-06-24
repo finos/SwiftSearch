@@ -3,6 +3,7 @@ import {
     PostDataFromSFE,
     PostErrorCallback,
     PostSuccessCallback,
+    SearchInitialPayload,
     SSAPIBridgeInterface,
 } from './interface/interface';
 import { logger } from './log/logger';
@@ -33,8 +34,8 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
 
     private static initSearch(data: any): void {
         logger.info(`-------------------- Swift-Search Api Bridge Created --------------------`);
-        const { userId, key } = data;
-        SwiftSearchAPI = new Search(userId, key);
+        const { userId, key, payload } = data;
+        SwiftSearchAPI = new Search(userId, key, payload as SearchInitialPayload);
     }
 
     public indexBatchCallback = ((requestId: number, status: boolean, data: string) => {
@@ -125,8 +126,8 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
     }
 
     public checkDiskSpace(data: PostDataFromSFE) {
-        const { requestId } = data;
-        this.SearchUtils.checkFreeSpace()
+        const { requestId, message } = data;
+        this.SearchUtils.checkFreeSpace(message.minimumDiskSpace)
             .then((res: boolean) => {
                 this.eventCallback(
                     apiBridgeCmds.swiftSearch,

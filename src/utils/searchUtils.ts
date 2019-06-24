@@ -19,10 +19,11 @@ export default class SearchUtils implements SearchUtilsInterface {
     /**
      * This function returns true if the available disk space
      * is more than the constant MINIMUM_DISK_SPACE
+     * @param minimumDiskSpace {number}
      * @returns {Promise}
      */
-    public checkFreeSpace(): Promise<boolean> {
-        return checkDiskSpace();
+    public checkFreeSpace(minimumDiskSpace: number): Promise<boolean> {
+        return checkDiskSpace(minimumDiskSpace || searchConfig.MINIMUM_DISK_SPACE);
     }
 
     /**
