@@ -122,7 +122,7 @@ export interface SearchInterface {
  * SearchUtilsInterface
  */
 export interface SearchUtilsInterface {
-    checkFreeSpace(): Promise<boolean>;
+    checkFreeSpace(minimumDiskSpace: number): Promise<boolean>;
     getSearchUserConfig(userId: string): Promise<UserConfig>;
     updateUserConfig(userId: string, data: UserConfig): Promise<UserConfig>;
 }
@@ -143,6 +143,11 @@ export interface SSAPIBridgeInterface {
     getLatestTimestamp(data: PostDataFromSFE): void;
     encryptIndex(data: PostDataFromSFE): void;
     deleteRealTimeFolder(): void;
+}
+
+export interface SearchInitialPayload {
+    searchPeriod: number;
+    minimumDiskSpace: number;
 }
 
 export interface PostSuccessCallback {

@@ -4,7 +4,14 @@ import * as path from 'path';
 import * as ref from 'ref';
 import * as util from 'util';
 import { compression, decompression } from './compressionLib/compression';
-import { Message, SearchInterface, SearchPayload, SearchResponse, UserConfig } from './interface/interface';
+import {
+    Message,
+    SearchInitialPayload,
+    SearchInterface,
+    SearchPayload,
+    SearchResponse,
+    UserConfig,
+} from './interface/interface';
 import { logger } from './log/logger';
 import { searchConfig } from './searchConfig';
 import { libSymphonySearch } from './searchLibrary';
@@ -25,15 +32,18 @@ export default class Search extends SearchUtils implements SearchInterface {
     private isInitialized: boolean;
     private isRealTimeIndexing: boolean;
     private readonly collector: any;
+    private readonly searchPeriodSubtract: number;
 
     /**
      * Constructor for the SymphonySearchEngine library
-     * @param userId (for the index folder name)
-     * @param key
+     * @param userId {number} For the index folder name
+     * @param key {string} - Key for serializing and deserialize of the index
+     * @param payload {object} - Additional payload
      */
-    constructor(userId: string, key: string) {
+    constructor(userId: string, key: string, payload: SearchInitialPayload) {
         super();
         logger.info(`-------------------- Starting Swift-Search --------------------`);
+        this.searchPeriodSubtract = (payload && payload.searchPeriod) || searchConfig.SEARCH_PERIOD_SUBTRACTOR;
         this.isInitialized = false;
         this.userId = userId;
         this.isRealTimeIndexing = false;
@@ -45,7 +55,7 @@ export default class Search extends SearchUtils implements SearchInterface {
 
     /**
      * Checks config version before decompression
-     * @param key
+     * @param key {string} - Key for serializing and deserialize of the index
      */
     public getUserConfig(key: string): void {
         super.getSearchUserConfig(this.userId)
@@ -94,6 +104,8 @@ export default class Search extends SearchUtils implements SearchInterface {
      * This init function
      * initialise the SymphonySearchEngine library
      * and creates a folder in the userData
+     * @param key {string} - Key for serializing and deserialize of the index
+     * @param isDecompressed {boolean} - If decompressed
      */
     public async init(key: string, isDecompressed: boolean): Promise<void> {
         if (!key) {
@@ -128,7 +140,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                     return;
                 }
                 logger.info(`search: Deserialization of Main Index Successful`, res);
-                const indexDateStartFrom = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
+                const indexDateStartFrom = new Date().getTime() - this.searchPeriodSubtract;
                 // Deleting all the messages except 3 Months from now
                 libSymphonySearch.symSEDeleteMessagesFromRAMIndex(null,
                     searchConfig.MINIMUM_DATE, indexDateStartFrom.toString());
@@ -144,8 +156,8 @@ export default class Search extends SearchUtils implements SearchInterface {
 
     /**
      * decompress the previously
-     * @param key
-     * @param reIndex
+     * @param key {string} - Key for serializing and deserialize of the index
+     * @param reIndex {boolean} - Does re-indexing required
      */
     public decompress(key: string, reIndex: boolean): void {
         const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
@@ -175,8 +187,8 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * An array of messages is passed for indexing
      * it will be indexed in a temporary index folder
-     * @param {Array} messages
-     * @param callback
+     * @param messages {Array}
+     * @param callback {function} - success or failure callback
      */
     public indexBatch(messages: string, callback: any): any {
         if (typeof callback !== 'function') {
@@ -218,7 +230,7 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * Batching the real time
      * messages for queue and flush
-     * @param {Object} message
+     * @param message {Object}
      */
     public batchRealTimeIndexing(message: Message[]): void {
         this.collector(message);
@@ -236,8 +248,8 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * An array of messages to be indexed
      * in real time
-     * @param messages
-     * @param callback
+     * @param messages {string}
+     * @param callback {function}
      */
     public realTimeIndexing(messages: string, callback: (status: boolean, message: string) => void): void | boolean | null {
         if (typeof callback !== 'function') {
@@ -272,6 +284,7 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * Encrypting the index after the merging the index
      * to the main user index
+     * @param key {string} - Key for serializing and deserialize of the index
      */
     public encryptIndex(key: string): Promise<void> {
         const mainIndexFolder: string = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
@@ -309,15 +322,15 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * This returns the search results
      * which returns a char *
-     * @param {String} query
-     * @param {Array} senderIds
-     * @param {Array} threadIds
-     * @param {String} fileType
-     * @param {String} startDate
-     * @param {String} endDate
-     * @param {Number} limit
-     * @param {Number} offset
-     * @param {Number} sortOrder
+     * @param query {String}
+     * @param senderIds {Array}
+     * @param threadIds {Array}
+     * @param fileType {String}
+     * @param startDate {String}
+     * @param endDate {String}
+     * @param limit {Number}
+     * @param offset {Number}
+     * @param sortOrder {Number}
      * @returns {Promise}
      * @deprecated Use searchQueryV2 instead
      */
@@ -356,7 +369,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 return;
             }
 
-            const searchPeriod = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
+            const searchPeriod = new Date().getTime() - this.searchPeriodSubtract;
             let startDateTime = searchPeriod;
             if (startDate) {
                 startDateTime = new Date(parseInt(startDate, 10)).getTime();
@@ -394,7 +407,7 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * This returns the search results
      * which returns a char *
-     * @param {object} payload
+     * @param payload {object}
      * @returns {Promise}
      */
     public searchQueryV2(payload: SearchPayload): Promise<SearchResponse> {
@@ -438,7 +451,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 return;
             }
 
-            const searchPeriod = new Date().getTime() - searchConfig.SEARCH_PERIOD_SUBTRACTOR;
+            const searchPeriod = new Date().getTime() - this.searchPeriodSubtract;
             let startDateTime = searchPeriod;
             if (startDate) {
                 startDateTime = new Date(parseInt(startDate, 10)).getTime();
@@ -476,7 +489,7 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * returns the latest message timestamp
      * from the indexed data
-     * @param callback
+     * @param callback {function}
      */
     public getLatestMessageTimestamp(callback: any): boolean | void | null {
         if (typeof callback !== 'function') {
@@ -516,11 +529,11 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * This the query constructor
      * for the search function
-     * @param {String} searchQuery
-     * @param {Array} senderId
-     * @param {Array} threadId
-     * @param {String} fileType
-     * @param {Boolean} sort
+     * @param searchQuery {String}
+     * @param senderId {Array}
+     * @param threadId {Array}
+     * @param fileType {String}
+     * @param sort {Boolean}
      * @returns {string}
      * @deprecated
      */
@@ -582,9 +595,9 @@ export default class Search extends SearchUtils implements SearchInterface {
 
     /**
      * appending the senderId and threadId for the query
-     * @param {String} searchText
-     * @param {String} fieldName
-     * @param {Array} valueArray
+     * @param searchText {String}
+     * @param fieldName {String}
+     * @param valueArray {Array}
      * @returns {string}
      * @deprecated
      */
@@ -614,7 +627,7 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * return the hash cash
      * tags from the query
-     * @param {String} searchText
+     * @param searchText {String}
      * @returns {Array}
      * @deprecated
      */
@@ -635,8 +648,8 @@ export default class Search extends SearchUtils implements SearchInterface {
     /**
      * If the search query does not have double quotes (implying phrase search),
      * then create all tuples of the terms in the search query
-     * @param {String} searchText
-     * @param {Boolean} sort
+     * @param searchText {String}
+     * @param sort {Boolean}
      * @returns {String}
      * @deprecated
      */
@@ -671,9 +684,9 @@ export default class Search extends SearchUtils implements SearchInterface {
      * Helper function for getTextQuery()
      * Given a list of tokens create a tuple given the start index of the
      * token list and given the number of tokens to create.
-     * @param {Array} tokens
-     * @param {Number} start
-     * @param {Number} numTokens
+     * @param tokens {Array}
+     * @param start {Number}
+     * @param numTokens {Number}
      * @returns {String}
      * @deprecated
      */
