@@ -26,13 +26,14 @@ const exec = util.promisify(childProcess.exec);
  */
 
 export default class Search extends SearchUtils implements SearchInterface {
-    public validatorResponse: null;
+    public validatorResponse: null | {};
 
     public readonly userId: string;
     private isInitialized: boolean;
     private isRealTimeIndexing: boolean;
     private readonly collector: any;
     private readonly searchPeriodSubtract: number;
+    private readonly minimumDiskSpace: number;
 
     /**
      * Constructor for the SymphonySearchEngine library
@@ -44,6 +45,7 @@ export default class Search extends SearchUtils implements SearchInterface {
         super();
         logger.info(`-------------------- Starting Swift-Search --------------------`);
         this.searchPeriodSubtract = (payload && payload.searchPeriod) || searchConfig.SEARCH_PERIOD_SUBTRACTOR;
+        this.minimumDiskSpace = (payload && payload.minimumDiskSpace) || searchConfig.MINIMUM_DISK_SPACE;
         this.isInitialized = false;
         this.userId = userId;
         this.isRealTimeIndexing = false;
@@ -123,14 +125,6 @@ export default class Search extends SearchUtils implements SearchInterface {
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
         if (isFileExist.call(this, 'USER_INDEX_PATH') && isDecompressed) {
             const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
-            const validatorResponse = await indexValidator.call(this, key);
-            logger.info(`search: Index validator response`, validatorResponse);
-            if (!validatorResponse) {
-                this.isInitialized = true;
-                logger.info(`search: Index Corrupted`);
-                logger.info(`-------------------- search: Initializing Fresh Index --------------------`);
-                return;
-            }
             libSymphonySearch.symSEDeserializeMainIndexToEncryptedFoldersAsync(mainIndexFolder, key, (error: never, res: number) => {
 
                 clearSearchData.call(this);
@@ -155,6 +149,48 @@ export default class Search extends SearchUtils implements SearchInterface {
     }
 
     /**
+     * This validated the available size of the index
+     * If less than the minimumDiskSpace will init the search
+     * else we disable swift-search
+     * @param key {string} - Key for serializing and deserialize of the index
+     * @param isDecompressed {boolean} - If decompressed
+     */
+    public async validateIndexSize(key: string, isDecompressed: boolean): Promise<void> {
+        const lz4Path = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
+            `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}${searchConfig.TAR_LZ4_EXT}`);
+        const stats = fs.statSync(lz4Path);
+        if (stats.size > this.minimumDiskSpace) {
+            logger.info(`search: Disabling Swift Search Index file (LZ4) size is greater than`, {
+                minimumDiskSpace: this.minimumDiskSpace,
+                size: stats.size,
+            });
+            return;
+        }
+
+        if (isFileExist.call(this, 'USER_INDEX_PATH') && isDecompressed) {
+            const validatorResponse = await indexValidator.call(this, key);
+            logger.info(`search: Index validator response`, validatorResponse);
+            if (!validatorResponse) {
+                logger.info(`search: Index Corrupted`);
+                logger.info(`-------------------- search: Initializing Fresh Index --------------------`);
+                this.init(key, false);
+                return;
+            }
+            try {
+                if (!this.validatorResponse) {
+                    this.validatorResponse = {};
+                }
+                Object.assign(this.validatorResponse, { size: stats.size});
+                logger.info(`search: Index validator response with size`, this.validatorResponse);
+            } catch (e) {
+                logger.info(`search: set size to validatorResponse failed`, this.validatorResponse);
+                this.validatorResponse = null;
+            }
+        }
+        this.init(key, isDecompressed);
+    }
+
+    /**
      * decompress the previously
      * @param key {string} - Key for serializing and deserialize of the index
      * @param reIndex {boolean} - Does re-indexing required
@@ -174,7 +210,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                     fs.mkdirSync(userIndexPath);
                     decompressedStatus = false;
                 }
-                this.init(key, decompressedStatus);
+                this.validateIndexSize(key, decompressedStatus);
             });
         } else {
             if (!isFileExist.call(this, 'USER_INDEX_PATH')) {
