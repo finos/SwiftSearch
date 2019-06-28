@@ -22,6 +22,7 @@ const WHITELIST = [
     apiBridgeCmds.getSearchUserConfig,
     apiBridgeCmds.updateUserConfig,
     apiBridgeCmds.search,
+    apiBridgeCmds.getValidatorResponse,
 ].reduce((acc, curr) => {
     acc[ curr ] = true;
     return acc;
@@ -81,6 +82,10 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
     public handleMessageEvents(data: any): void {
         const { method, message } = data;
 
+        if (method === apiBridgeCmds.setIsSwiftSearchInitialized) {
+            return;
+        }
+
         if (!SSAPIBridge.isLibInit() && !WHITELIST[method]) {
             logger.info(`-------------------- searchAPIBridge: Call was made before Initializing --------------------`);
             return;
@@ -88,6 +93,10 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
 
         switch (method) {
             case apiBridgeCmds.initialSearch:
+                const { payload } = message;
+                payload.setLibInit = (state: boolean) => {
+                    this.publishInitializeState(state);
+                };
                 SSAPIBridge.initSearch(message);
                 break;
             case apiBridgeCmds.getLatestTimestamp:
@@ -118,10 +127,25 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
                 this.deleteRealTimeFolder();
                 break;
             case apiBridgeCmds.getValidatorResponse:
-                this.getValidatorResponseCallback(data.requestId, SwiftSearchAPI.validatorResponse);
+                this.getValidatorResponseCallback(data.requestId, SwiftSearchAPI && SwiftSearchAPI.validatorResponse);
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * This function is required to set isLibInit
+     * Which sets the current swift-search state on the client
+     * only if its in context-isolated world
+     * @param arg
+     */
+    public publishInitializeState(arg: boolean) {
+        if (this.eventCallback) {
+            this.eventCallback(apiBridgeCmds.swiftSearch, {
+                data: arg,
+                method: apiBridgeCmds.setIsSwiftSearchInitialized,
+            });
         }
     }
 

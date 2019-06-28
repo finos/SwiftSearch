@@ -34,6 +34,7 @@ export default class Search extends SearchUtils implements SearchInterface {
     private readonly collector: any;
     private readonly searchPeriodSubtract: number;
     private readonly minimumDiskSpace: number;
+    private readonly publishLibState: (state: boolean) => void;
 
     /**
      * Constructor for the SymphonySearchEngine library
@@ -43,9 +44,11 @@ export default class Search extends SearchUtils implements SearchInterface {
      */
     constructor(userId: string, key: string, payload: SearchInitialPayload) {
         super();
+        logger.info(`-------------------- Swift-Search Utils Initialized --------------------`);
         logger.info(`-------------------- Starting Swift-Search --------------------`);
         this.searchPeriodSubtract = (payload && payload.searchPeriod) || searchConfig.SEARCH_PERIOD_SUBTRACTOR;
         this.minimumDiskSpace = (payload && payload.minimumDiskSpace) || searchConfig.MINIMUM_DISK_SPACE;
+        this.publishLibState = (payload && payload.setLibInit) || null;
         this.isInitialized = false;
         this.userId = userId;
         this.isRealTimeIndexing = false;
@@ -130,7 +133,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 clearSearchData.call(this);
                 if (res === undefined || res === null || res < 0) {
                     logger.error(`search: Deserialization of Main Index Failed`, error);
-                    this.isInitialized = true;
+                    this.setLibInitState(true);
                     return;
                 }
                 logger.info(`search: Deserialization of Main Index Successful`, res);
@@ -138,12 +141,12 @@ export default class Search extends SearchUtils implements SearchInterface {
                 // Deleting all the messages except 3 Months from now
                 libSymphonySearch.symSEDeleteMessagesFromRAMIndex(null,
                     searchConfig.MINIMUM_DATE, indexDateStartFrom.toString());
-                this.isInitialized = true;
+                this.setLibInitState(true);
                 logger.info(`-------------------- Initialization Complete --------------------`);
             });
         } else {
             logger.info(`-------------------- Initializing Fresh Index --------------------`);
-            this.isInitialized = true;
+            this.setLibInitState(true);
             clearSearchData.call(this);
         }
     }
@@ -158,12 +161,25 @@ export default class Search extends SearchUtils implements SearchInterface {
     public async validateIndexSize(key: string, isDecompressed: boolean): Promise<void> {
         const lz4Path = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}${searchConfig.TAR_LZ4_EXT}`);
-        const stats = fs.statSync(lz4Path);
-        if (stats.size > this.minimumDiskSpace) {
+        const stats = fs.existsSync(lz4Path) && fs.statSync(lz4Path);
+        if (stats && stats.size > this.minimumDiskSpace) {
             logger.info(`search: Disabling Swift Search Index file (LZ4) size is greater than`, {
                 minimumDiskSpace: this.minimumDiskSpace,
                 size: stats.size,
             });
+            this.setLibInitState(false);
+            clearSearchData.call(this);
+            return;
+        }
+        const validateSpace = stats && stats.size ? stats.size - this.minimumDiskSpace : this.minimumDiskSpace;
+        const result = await super.checkFreeSpace(validateSpace);
+        if (!result) {
+            logger.info(`search: Disabling Swift Search disk space less than the subtracted space (file size lz4 - minimum space required > available space)`, {
+                minimumDiskSpace: this.minimumDiskSpace,
+                size: stats && stats.size,
+            });
+            this.setLibInitState(false);
+            clearSearchData.call(this);
             return;
         }
 
@@ -180,7 +196,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 if (!this.validatorResponse) {
                     this.validatorResponse = {};
                 }
-                Object.assign(this.validatorResponse, { size: stats.size});
+                Object.assign(this.validatorResponse, { size: stats && stats.size});
                 logger.info(`search: Index validator response with size`, this.validatorResponse);
             } catch (e) {
                 logger.info(`search: set size to validatorResponse failed`, this.validatorResponse);
@@ -188,6 +204,23 @@ export default class Search extends SearchUtils implements SearchInterface {
             }
         }
         this.init(key, isDecompressed);
+    }
+
+    /**
+     * This function sets the isInitialized state
+     * which is then published to client only if its in
+     * context-isolated world
+     * @param state
+     */
+    public setLibInitState(state: boolean): void {
+        if (typeof state !== 'boolean') {
+            return;
+        }
+        this.isInitialized = state;
+        if (typeof this.publishLibState === 'function') {
+            logger.info(`search: publishing lib state`, this.isInitialized);
+            this.publishLibState(this.isInitialized);
+        }
     }
 
     /**
