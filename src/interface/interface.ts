@@ -143,11 +143,13 @@ export interface SSAPIBridgeInterface {
     getLatestTimestamp(data: PostDataFromSFE): void;
     encryptIndex(data: PostDataFromSFE): void;
     deleteRealTimeFolder(): void;
+    publishInitializeState(arg: boolean): void;
 }
 
 export interface SearchInitialPayload {
     searchPeriod: number;
     minimumDiskSpace: number;
+    setLibInit: (state: boolean) => void;
 }
 
 export interface PostSuccessCallback {
@@ -178,6 +180,7 @@ export enum apiBridgeCmds {
     realTimeIndex = 'swift-search::real-time-index',
     deleteRealTimeIndex = 'swift-search::delete-real-time-index',
     getValidatorResponse = 'swift-search::get-validator-response',
+    setIsSwiftSearchInitialized = 'swift-search::set-is-swift-search-initialized',
 
     // Search Utils
     checkDiskSpace = 'swift-search::check-disk-space',
