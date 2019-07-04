@@ -592,6 +592,9 @@ export default class Search extends SearchUtils implements SearchInterface {
      * before starting the batch-indexing
      */
     public deleteRealTimeFolder(): void {
+        if (!this.isInitialized) {
+            return;
+        }
         libSymphonySearch.symSEClearRealtimeRAMIndex();
     }
 
