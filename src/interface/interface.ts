@@ -181,6 +181,7 @@ export enum apiBridgeCmds {
     deleteRealTimeIndex = 'swift-search::delete-real-time-index',
     getValidatorResponse = 'swift-search::get-validator-response',
     setIsSwiftSearchInitialized = 'swift-search::set-is-swift-search-initialized',
+    destroyLibrary = 'swift-search::swift-search-destroy-library',
 
     // Search Utils
     checkDiskSpace = 'swift-search::check-disk-space',

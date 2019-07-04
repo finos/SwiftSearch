@@ -29,6 +29,13 @@ const WHITELIST = [
 }, {});
 
 export default class SSAPIBridge implements SSAPIBridgeInterface {
+
+    public static destroySearch(): void {
+        if (SSAPIBridge.isLibInit()) {
+            SwiftSearchAPI.destroyLibrary();
+        }
+    }
+
     private static isLibInit(): boolean {
         return SwiftSearchAPI && SwiftSearchAPI.isLibInit();
     }
@@ -128,6 +135,9 @@ export default class SSAPIBridge implements SSAPIBridgeInterface {
                 break;
             case apiBridgeCmds.getValidatorResponse:
                 this.getValidatorResponseCallback(data.requestId, SwiftSearchAPI && SwiftSearchAPI.validatorResponse);
+                break;
+            case apiBridgeCmds.destroyLibrary:
+                SSAPIBridge.destroySearch();
                 break;
             default:
                 break;
