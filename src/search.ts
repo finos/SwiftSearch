@@ -663,6 +663,18 @@ export default class Search extends SearchUtils implements SearchInterface {
     }
 
     /**
+     * This will destroy search instance if created
+     */
+    public destroyLibrary() {
+        if (!libSymphonySearch) {
+            return;
+        }
+        logger.info(`-------------------- Swift-Search Instance Destroyed --------------------`);
+        this.setLibInitState(false);
+        libSymphonySearch.symSEDestroy();
+    }
+
+    /**
      * appending the senderId and threadId for the query
      * @param searchText {String}
      * @param fieldName {String}
