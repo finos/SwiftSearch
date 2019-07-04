@@ -100,6 +100,11 @@
     </div>
     <br>
     <div>
+        <label>Destroy Search</label>
+        <button id='destroy'>Destroy Search</button>
+    </div>
+    <br>
+    <div>
         <div>
             <label>Update User Config</label>
         </div>
@@ -146,6 +151,7 @@
     var version = document.getElementById('version');
     var rotationId = document.getElementById('rotationId');
     var updateUserConfig = document.getElementById('updateUserConfig');
+    var destroy = document.getElementById('destroy');
 
     buttonEl.addEventListener('click', function () {
         if (!search.isLibInit()) {
@@ -223,6 +229,11 @@
         } else {
             resultsEl.innerHTML = "Please check the entered value"
         }
+    });
+
+    destroy.addEventListener('click', function () {
+        search.destroyLibrary();
+        resultsEl.innerHTML = 'success';
     });
 
     batchMessage.addEventListener('click', function () {

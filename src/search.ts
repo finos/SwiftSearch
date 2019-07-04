@@ -670,7 +670,7 @@ export default class Search extends SearchUtils implements SearchInterface {
             return;
         }
         logger.info(`-------------------- Swift-Search Instance Destroyed --------------------`);
-        this.isInitialized = false;
+        this.setLibInitState(false);
         libSymphonySearch.symSEDestroy();
     }
 
