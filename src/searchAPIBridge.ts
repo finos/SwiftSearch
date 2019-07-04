@@ -30,7 +30,7 @@ const WHITELIST = [
 
 export default class SSAPIBridge implements SSAPIBridgeInterface {
 
-    public static destroySearch(): void {
+    private static destroySearch(): void {
         if (SSAPIBridge.isLibInit()) {
             SwiftSearchAPI.destroyLibrary();
         }
