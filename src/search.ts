@@ -422,7 +422,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 return;
             }
 
-            if (!SORT_ORDER || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
+            if (SORT_ORDER === undefined || SORT_ORDER === null || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
                 SORT_ORDER = searchConfig.SORT_BY_DATE;
             }
 
@@ -506,7 +506,7 @@ export default class Search extends SearchUtils implements SearchInterface {
                 return;
             }
 
-            if (!SORT_ORDER || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
+            if (SORT_ORDER === undefined || SORT_ORDER === null || typeof SORT_ORDER !== 'number' || Math.round(SORT_ORDER) !== SORT_ORDER) {
                 SORT_ORDER = searchConfig.SORT_BY_DATE;
             }
 
