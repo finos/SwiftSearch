@@ -759,7 +759,7 @@ describe('Tests for Search', () => {
                 version: 1,
             };
             SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res: UserConfig) => {
-                expect(res.indexVersion).toEqual('v3');
+                expect(res.indexVersion).toEqual('v4');
                 done();
             });
         });
@@ -772,7 +772,7 @@ describe('Tests for Search', () => {
             };
             SearchUtilsAPI.updateUserConfig(1234567891011, data).then((res: UserConfig) => {
                 expect(res.rotationId).toEqual(1);
-                expect(res.indexVersion).toEqual('v3');
+                expect(res.indexVersion).toEqual('v4');
                 done();
             });
         });
