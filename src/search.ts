@@ -79,17 +79,6 @@ export default class Search extends SearchUtils implements SearchInterface {
                  * index
                  */
                 this.decompress(key, true);
-
-                // Check if indexVersion exist in the config
-                // else do not update
-                const userConfig: UserConfig = config;
-                if (userConfig && userConfig.indexVersion) {
-                    userConfig.indexVersion = searchConfig.INDEX_VERSION;
-                    super.updateUserConfig(this.userId, userConfig)
-                        .catch(() => {
-                            logger.error('search: Error updating index version user config');
-                        });
-                }
             })
             .catch(() => {
                 this.decompress(key, true);
