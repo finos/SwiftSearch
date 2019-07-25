@@ -19,16 +19,16 @@ async function checkDiskSpace(minimumDiskSpace: number): Promise<boolean> {
     }
 
     try {
-        const { free } = await DiskUsage.check(userDataPath);
+        const { available } = await DiskUsage.check(userDataPath);
 
-        logger.info(`checkDiskSpace: response from diskusage`, free);
+        logger.info(`checkDiskSpace: response from diskusage`, available);
 
-        if (!free) {
-            logger.error(`checkDiskSpace: Error retrieving available disk space`, free);
+        if (!available) {
+            logger.error(`checkDiskSpace: Error retrieving available disk space`, available);
             return false;
         }
 
-        return free >= minimumDiskSpace;
+        return available >= minimumDiskSpace;
     } catch (e) {
         logger.error(`checkDiskSpace: Error diskusage`, e);
         return false;
