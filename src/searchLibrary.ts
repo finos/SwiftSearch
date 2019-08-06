@@ -30,7 +30,7 @@ const lib = ffi.Library(searchConfig.LIBRARY_CONSTANTS.SEARCH_LIBRARY_PATH, {
     symSE_index_main_RAM: ['int', ['string']],
     symSE_index_realtime: ['int', ['string', 'string']],
     symSE_index_realtime_RAM: ['int', ['string']],
-    symSE_init: ['void', []],
+    symSE_init: ['void', ['string']],
     symSE_main_FS_index_to_RAM_index: ['int', ['string']],
     symSE_main_RAM_index_get_last_message_timestamp: ['char *', []],
     symSE_main_RAM_index_to_FS_index: ['int', ['string']],
