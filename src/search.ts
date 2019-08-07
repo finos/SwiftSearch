@@ -110,7 +110,13 @@ export default class Search extends SearchUtils implements SearchInterface {
             return;
         }
         libSymphonySearch.symSEDestroy();
-        libSymphonySearch.symSEInit(searchConfig.LIBRARY_CONSTANTS.DICTIONARY_PATH);
+        try {
+            libSymphonySearch.symSEInit(searchConfig.LIBRARY_CONSTANTS.DICTIONARY_PATH);
+        } catch (e) {
+            logger.error(`search: Initialization failed (symSEInit)`, e);
+            this.setLibInitState(false);
+            return;
+        }
         libSymphonySearch.symSEClearMainRAMIndex();
         libSymphonySearch.symSEClearRealtimeRAMIndex();
         const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
