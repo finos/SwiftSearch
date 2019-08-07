@@ -109,7 +109,7 @@ export default class Search extends SearchUtils implements SearchInterface {
         if (bufKey.length !== searchConfig.KEY_LENGTH) {
             return;
         }
-        if (!isFileExist.call('DICTIONARY_PATH')) {
+        if (!isFileExist.call(this,'DICTIONARY_PATH')) {
             logger.error(`search: dictionary file missing`);
             return;
         }
