@@ -109,6 +109,10 @@ export default class Search extends SearchUtils implements SearchInterface {
         if (bufKey.length !== searchConfig.KEY_LENGTH) {
             return;
         }
+        if (!isFileExist.call('DICTIONARY_PATH')) {
+            logger.error(`search: dictionary file missing`);
+            return;
+        }
         libSymphonySearch.symSEDestroy();
         try {
             libSymphonySearch.symSEInit(searchConfig.LIBRARY_CONSTANTS.DICTIONARY_PATH);
@@ -827,6 +831,7 @@ function isFileExist(this: Search, type: string): boolean {
     }
 
     const paths: any = {
+        DICTIONARY_PATH: searchConfig.LIBRARY_CONSTANTS.DICTIONARY_PATH,
         LZ4: path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
             `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}${searchConfig.TAR_LZ4_EXT}`),
         USER_INDEX_PATH: path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
