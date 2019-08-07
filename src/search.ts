@@ -110,7 +110,13 @@ export default class Search extends SearchUtils implements SearchInterface {
             return;
         }
         libSymphonySearch.symSEDestroy();
-        libSymphonySearch.symSEInit();
+        try {
+            libSymphonySearch.symSEInit(searchConfig.LIBRARY_CONSTANTS.DICTIONARY_PATH);
+        } catch (e) {
+            logger.error(`search: Initialization failed (symSEInit)`, e);
+            this.setLibInitState(false);
+            return;
+        }
         libSymphonySearch.symSEClearMainRAMIndex();
         libSymphonySearch.symSEClearRealtimeRAMIndex();
         const userIndexPath = path.join(searchConfig.FOLDERS_CONSTANTS.INDEX_PATH,
@@ -842,7 +848,7 @@ async function indexValidator(this: Search, key: string): Promise<boolean> {
         `${searchConfig.FOLDERS_CONSTANTS.PREFIX_NAME}_${this.userId}`);
     const mainIndexFolder = path.join(userIndexPath, searchConfig.FOLDERS_CONSTANTS.MAIN_INDEX);
     try {
-        const { stdout } = await exec(`"${searchConfig.LIBRARY_CONSTANTS.INDEX_VALIDATOR}" "${mainIndexFolder}" "${key}"`);
+        const { stdout } = await exec(`"${searchConfig.LIBRARY_CONSTANTS.INDEX_VALIDATOR}" "${mainIndexFolder}" "${key}" "${searchConfig.LIBRARY_CONSTANTS.DICTIONARY_PATH}"`);
         const data = JSON.parse(stdout);
         logger.info(`search: Index validator response`, { stdout: data });
         this.validatorResponse = data;

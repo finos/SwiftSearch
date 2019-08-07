@@ -18,6 +18,7 @@ const indexFolderPath = isDevEnv ? './' : userData;
 
 const winIndexValidatorArch = arch ? 'indexvalidator-x86.exe' : 'indexvalidator-x64.exe';
 const indexValidatorPath = isMac ? path.join(macLibraryPath, 'indexvalidator.exec') : path.join(winLibraryPath, winIndexValidatorArch);
+const dictionaryPath = isMac ? path.join(macLibraryPath, 'dictionary') : path.join(winLibraryPath, 'dictionary');
 
 const winSearchLibArchPath = arch ? 'libsymphonysearch-x86.dll' : 'libsymphonysearch-x64.dll';
 const libraryPath = isMac ? path.join(macLibraryPath, 'libsymphonysearch.dylib') : path.join(winLibraryPath, winSearchLibArchPath);
@@ -28,6 +29,7 @@ const userConfigFile = isDevEnv ? path.join(__dirname, '..', userConfigFileName)
 const libraryFolderPath = isMac ? macLibraryPath : winLibraryPath;
 
 const libraryPaths = {
+    DICTIONARY_PATH: dictionaryPath,
     INDEX_VALIDATOR: indexValidatorPath,
     LIBRARY_FOLDER_PATH: libraryFolderPath,
     LZ4_PATH: lz4Path,
@@ -49,7 +51,7 @@ const searchConfig = {
     DISK_NOT_FOUND: 'DISK_NOT_FOUND',
     DISK_NOT_READY: 'NOT_READY',
     FOLDERS_CONSTANTS: folderPaths,
-    INDEX_VERSION: 'v4',
+    INDEX_VERSION: 'v5',
     KEY_ENCODING: 'base64',
     KEY_LENGTH: 32,
     LIBRARY_CONSTANTS: libraryPaths,

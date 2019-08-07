@@ -44,7 +44,7 @@ describe('Tests for Search Context-Isolation PostMessage', () => {
     const configFile = path.join(userConfigDir, 'search_users_config.json');
 
     const UserData: any = {
-        indexVersion: 'v4',
+        indexVersion: 'v5',
         language: 'en',
         rotationId: 0,
         version: 1,
