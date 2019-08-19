@@ -1,7 +1,7 @@
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as ref from 'ref';
+import * as ref from 'ref-napi';
 import * as util from 'util';
 import { compression, decompression } from './compressionLib/compression';
 import {
