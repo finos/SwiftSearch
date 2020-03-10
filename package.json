@@ -38,7 +38,7 @@
     "typescript": "2.9.2"
   },
   "dependencies": {
-    "diskusage": "1.1.2",
+    "diskusage": "1.1.3",
     "electron-log": "2.2.16",
     "ffi-napi": "2.4.5",
     "keymirror": "0.1.1",
