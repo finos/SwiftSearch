@@ -4,15 +4,15 @@ This file lists the maintainers of this repository.
 
 ## Current maintainers
 
-| GitHub Username | Name | Organization | Email |
-|----------------|------|--------------|-------|
-| @KiranNiranjan | Kiran Niranjan | KiKe | *please add email* |
-| @NguyenTranHoangSym | *please add name* | *please add organization* | *please add email* |
-| @apicolet-symphony | Antoine Picolet | Symphony | *please add email* |
+| GitHub Username | Name | Organization | Email (optional) |
+|----------------|------|--------------|------------------|
+| @KiranNiranjan | Kiran Niranjan | KiKe |  |
+| @NguyenTranHoangSym | *please add name* | *please add organization* |  |
+| @apicolet-symphony | Antoine Picolet | Symphony |  |
 | @keerthi16 | Keerthi Niranjan | KiKe | keerthiniranjan16@gmail.com |
-| @mmaio-symphony | *please add name* | *please add organization* | *please add email* |
-| @sbenmoussati | Salah Benmoussati | *please add organization* | *please add email* |
-| @symphony-crowdin | Symphony Crowdin | @SymphonyOSF | *please add email* |
+| @mmaio-symphony | *please add name* | *please add organization* |  |
+| @sbenmoussati | Salah Benmoussati | *please add organization* |  |
+| @symphony-crowdin | Symphony Crowdin | @SymphonyOSF |  |
 
 For information about maintainer responsibilities and resources, see the [FINOS Maintainers Cheatsheet](https://community.finos.org/docs/finos-maintainers-cheatsheet).
 
